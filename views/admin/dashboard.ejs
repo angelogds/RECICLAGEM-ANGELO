@@ -1,0 +1,10 @@
+
+<!DOCTYPE html><html><head><link rel='stylesheet' href='/public/style.css'></head>
+<body><%- include("../partials/cabecalho") %><div class='box'>
+<h2>Equipamentos</h2>
+<ul>
+<% equipamentos.forEach(e=>{ %>
+<li><%=e.nome%> — <a href="/funcionario/abrir_os?equip_id=<%=e.id%>">Abrir OS</a></li>
+<% }) %>
+</ul>
+</div></body></html>

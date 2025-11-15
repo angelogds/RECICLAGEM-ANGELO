@@ -1,0 +1,12 @@
+
+<!DOCTYPE html><html><head><link rel='stylesheet' href='/public/style.css'></head>
+<body><%- include("../partials/cabecalho") %>
+<div class='box'>
+<h2>Abrir OS — <%= equip?equip.nome:"" %></h2>
+<form method="POST" action="/api/ordens" enctype="multipart/form-data">
+<input type="hidden" name="equipamento_id" value="<%=equip?equip.id:""%>">
+<label>Descrição:</label><textarea name="descricao"></textarea>
+<label>Foto Antes:</label><input type="file" name="foto_antes">
+<button>Enviar</button>
+</form>
+</div></body></html>

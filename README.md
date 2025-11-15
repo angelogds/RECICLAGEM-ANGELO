@@ -1,1 +1,0 @@
-Manutenção Campo do Gado - Tema Branco+Verde\nDefault admin: admin@campodogado.com / 12345\nDeploy on Render: Manual Deploy -> Deploy latest commit

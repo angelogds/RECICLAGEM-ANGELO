@@ -199,6 +199,54 @@ app.post('/admin/ordens/:id/finish', uploadFinish, (req, res) => {
     );
   });
 });
+// --------- Relatório PDF (todas as ordens ou por id via ?id=) ----------
+const PDFDocument = require('pdfkit');
+
+app.get('/admin/ordens/report', (req, res) => {
+  const id = req.query.id;
+  const sql = id
+    ? `SELECT o.*, e.nome as equipamento_nome FROM ordens_servico o LEFT JOIN equipamentos e ON e.id = o.equipamento_id WHERE o.id = ?`
+    : `SELECT o.*, e.nome as equipamento_nome FROM ordens_servico o LEFT JOIN equipamentos e ON e.id = o.equipamento_id ORDER BY o.data_abertura DESC`;
+
+  const params = id ? [id] : [];
+  db.all(sql, params, (err, rows) => {
+    if (err) return res.status(500).send('Erro ao buscar ordens');
+
+    // criar PDF
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+    res.setHeader('Content-Type', 'application/pdf');
+    const filename = id ? `ordem_${id}.pdf` : 'relatorio_ordens.pdf';
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    doc.pipe(res);
+
+    doc.fontSize(18).text('Relatório de Ordens de Serviço', { align: 'center' });
+    doc.moveDown();
+
+    rows.forEach((r) => {
+      doc.fontSize(12).text(`OS #${r.id} — Equipamento: ${r.equipamento_nome || r.equipamento_id}`);
+      doc.fontSize(10).text(`Status: ${r.status} | Abertura: ${r.data_abertura || '-'} | Início: ${r.data_inicio || '-'} | Fechamento: ${r.data_fechamento || '-'}`);
+      if (r.tempo_total != null) {
+        // formatar tempo_total (segundos) para hh:mm:ss
+        const s = Number(r.tempo_total) || 0;
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        const tstr = `${h}h ${m}m ${sec}s`;
+        doc.text(`Tempo total: ${tstr}`);
+      }
+      doc.moveDown(0.5);
+      doc.text(`Descrição: ${r.descricao || '-'}`);
+      doc.moveDown();
+      // imagens — se existir foto_antes / foto_depois, colocamos link (imagens embutidas em PDF exigem paths absolutos e espaço; simplificamos com texto)
+      if (r.foto_antes) doc.text(`Foto antes: ${req.protocol}://${req.get('host')}/${r.foto_antes}`);
+      if (r.foto_depois) doc.text(`Foto depois: ${req.protocol}://${req.get('host')}/${r.foto_depois}`);
+      doc.moveDown(1);
+      doc.moveDown(0.5);
+    });
+
+    doc.end();
+  });
+});
 
 // Start
 const PORT = process.env.PORT || 10000;

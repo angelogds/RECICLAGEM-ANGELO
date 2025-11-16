@@ -186,6 +186,40 @@ app.get("/admin/ordens", (req, res) => {
     }
   );
 });
+// ------------------------------------------
+// SALVAR ORDEM DE SERVIÇO
+// ------------------------------------------
+
+const uploadOS = upload.single("foto_antes");
+
+app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
+  const { equipamento_id, descricao } = req.body;
+
+  let foto_antes = null;
+
+  if (req.file) {
+    const dest = `uploads/ordens/${Date.now()}_${req.file.originalname}`;
+    fs.renameSync(req.file.path, dest);
+    foto_antes = dest;
+  }
+
+  db.run(
+    `INSERT INTO ordens_servico 
+      (equipamento_id, descricao, status, foto_antes) 
+     VALUES (?, ?, 'Aberta', ?)`,
+    [equipamento_id, descricao, foto_antes],
+    function (err) {
+      if (err) {
+        console.error("Erro ao salvar OS:", err.message);
+        return res.send("Erro ao salvar OS.");
+      }
+
+      console.log("OS criada! ID:", this.lastID);
+
+      res.redirect("/admin/ordens"); // redireciona para a lista
+    }
+  );
+});
 
 // ------------------------------------------
 // SERVIDOR

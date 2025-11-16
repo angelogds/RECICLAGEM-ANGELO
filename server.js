@@ -65,17 +65,14 @@ db.serialize(() => {
 // ROTAS PRINCIPAIS
 // ------------------------------------------
 
-// Início → vai para login
 app.get("/", (req, res) => {
   res.redirect("/admin/login");
 });
 
-// Tela de login
 app.get("/admin/login", (req, res) => {
   res.render("admin/login");
 });
 
-// Dashboard básico
 app.get("/admin/dashboard", (req, res) => {
   res.render("admin/dashboard");
 });
@@ -84,22 +81,18 @@ app.get("/admin/dashboard", (req, res) => {
 // ROTAS DE EQUIPAMENTOS
 // ------------------------------------------
 
-// Listar equipamentos
 app.get("/admin/equipamentos", (req, res) => {
   db.all("SELECT * FROM equipamentos ORDER BY nome ASC", [], (err, rows) => {
     res.render("admin/equipamentos", { equipamentos: rows || [] });
   });
 });
 
-// Tela de cadastro
 app.get("/admin/equipamentos/novo", (req, res) => {
   res.render("admin/equipamentos_novo");
 });
 
-// Upload de foto
 const uploadEquip = upload.single("foto");
 
-// Salvar equipamento
 app.post("/admin/equipamentos/novo", uploadEquip, (req, res) => {
   const { nome, setor, correias_utilizadas } = req.body;
 
@@ -134,7 +127,7 @@ app.post("/admin/equipamentos/novo", uploadEquip, (req, res) => {
 });
 
 // ------------------------------------------
-// ROTAS DO FUNCIONÁRIO (ABRIR OS)
+// FUNCIONÁRIO — ABRIR OS
 // ------------------------------------------
 
 app.get("/funcionario/abrir_os", (req, res) => {
@@ -144,9 +137,11 @@ app.get("/funcionario/abrir_os", (req, res) => {
     res.render("funcionario/abrir_os", { equip: row });
   });
 });
+
 // ------------------------------------------
-// SALVAR OS ABERTA PELO FUNCIONÁRIO
+// SALVAR OS (APENAS 1 VEZ!!!)
 // ------------------------------------------
+
 const uploadOS = upload.single("foto_antes");
 
 app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
@@ -171,9 +166,11 @@ app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
     }
   );
 });
+
 // ------------------------------------------
-// LISTAR ORDENS DE SERVIÇO
+// LISTAR ORDENS
 // ------------------------------------------
+
 app.get("/admin/ordens", (req, res) => {
   db.all(
     `SELECT o.*, e.nome AS equipamento_nome
@@ -186,43 +183,10 @@ app.get("/admin/ordens", (req, res) => {
     }
   );
 });
-// ------------------------------------------
-// SALVAR ORDEM DE SERVIÇO
-// ------------------------------------------
-
-const uploadOS = upload.single("foto_antes");
-
-app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
-  const { equipamento_id, descricao } = req.body;
-
-  let foto_antes = null;
-
-  if (req.file) {
-    const dest = `uploads/ordens/${Date.now()}_${req.file.originalname}`;
-    fs.renameSync(req.file.path, dest);
-    foto_antes = dest;
-  }
-
-  db.run(
-    `INSERT INTO ordens_servico 
-      (equipamento_id, descricao, status, foto_antes) 
-     VALUES (?, ?, 'Aberta', ?)`,
-    [equipamento_id, descricao, foto_antes],
-    function (err) {
-      if (err) {
-        console.error("Erro ao salvar OS:", err.message);
-        return res.send("Erro ao salvar OS.");
-      }
-
-      console.log("OS criada! ID:", this.lastID);
-
-      res.redirect("/admin/ordens"); // redireciona para a lista
-    }
-  );
-});
 
 // ------------------------------------------
 // SERVIDOR
 // ------------------------------------------
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log("Rodando na porta", PORT));

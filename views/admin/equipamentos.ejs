@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="stylesheet" href="/public/style.css">
-  </head>
+<head>
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+
 <body>
   <%- include("../partials/cabecalho") %>
 
   <div class="box">
-    <h2>Equipamentos</h2>
+    <h2>Equipamentos Cadastrados</h2>
 
     <a href="/admin/equipamentos/novo">
-      <button style="margin-bottom: 15px;">Cadastrar novo equipamento</button>
+      <button style="margin-bottom: 15px;">Cadastrar Novo Equipamento</button>
     </a>
 
     <ul>
       <% equipamentos.forEach(e => { %>
-        <li>
+        <li style="margin-bottom:10px;">
           <b><%= e.nome %></b> — <%= e.setor %>
 
           <% if (e.qr_code) { %>
@@ -26,7 +27,7 @@
         </li>
       <% }) %>
     </ul>
-  </div>
 
+  </div>
 </body>
 </html>

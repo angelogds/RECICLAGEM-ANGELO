@@ -1,3 +1,139 @@
+// Dependências principais
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
+const sqlite3 = require("sqlite3").verbose();
+const session = require("express-session");
+const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const qrcode = require("qrcode");
+const methodOverride = require("method-override");
+
+// Criação do app
+const app = express();
+
+// Configurações básicas
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(methodOverride("_method"));
+app.use(express.static("public"));
+
+// Sessão
+app.use(
+  session({
+    secret: "segredo-super-seguro",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Banco de dados SQLite
+const db = new sqlite3.Database("./data/database.sqlite", (err) => {
+  if (err) {
+    console.error("Erro ao conectar ao banco:", err.message);
+  } else {
+    console.log("Banco SQLite conectado com sucesso!");
+  }
+});
+
+// Configuração do Multer (upload de arquivos)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/tmp");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage });
+
+// ------------------------------------------
+// ROTAS DE LOGIN
+// ------------------------------------------
+app.get("/admin/login", (req, res) => {
+  res.render("admin/login");
+});
+
+app.post("/admin/login", (req, res) => {
+  const { email, senha } = req.body;
+  db.get("SELECT * FROM usuarios WHERE email=?", [email], (err, user) => {
+    if (user && bcrypt.compareSync(senha, user.senha)) {
+      req.session.user = user;
+      res.redirect("/admin/dashboard");
+    } else {
+      res.send("Login inválido");
+    }
+  });
+});
+
+// ------------------------------------------
+// DASHBOARD
+// ------------------------------------------
+app.get("/admin/dashboard", (req, res) => {
+  res.render("admin/dashboard", { user: req.session.user });
+});
+
+// ------------------------------------------
+// EQUIPAMENTOS
+// ------------------------------------------
+app.get("/admin/equipamentos", (req, res) => {
+  db.all("SELECT * FROM equipamentos", [], (err, rows) => {
+    res.render("admin/equipamentos", { equipamentos: rows });
+  });
+});
+
+app.get("/admin/equipamentos/novo", (req, res) => {
+  res.render("admin/equipamentos_novo");
+});
+
+app.post("/admin/equipamentos", upload.single("foto"), (req, res) => {
+  const { nome, descricao } = req.body;
+  const foto = req.file ? req.file.path : null;
+  db.run(
+    "INSERT INTO equipamentos (nome, descricao, foto) VALUES (?,?,?)",
+    [nome, descricao, foto],
+    function (err) {
+      res.redirect("/admin/equipamentos");
+    }
+  );
+});
+
+// ------------------------------------------
+// ORDENS DE SERVIÇO
+// ------------------------------------------
+app.get("/admin/ordens", (req, res) => {
+  db.all(
+    `SELECT o.*, e.nome AS equipamento_nome 
+     FROM ordens_servico o 
+     LEFT JOIN equipamentos e ON e.id = o.equipamento_id 
+     ORDER BY o.data_abertura DESC`,
+    [],
+    (err, rows) => {
+      res.render("admin/ordens", { ordens: rows });
+    }
+  );
+});
+
+// ------------------------------------------
+// FUNCIONÁRIO ABRIR OS VIA QR CODE
+// ------------------------------------------
+app.get("/funcionario/abrir_os", (req, res) => {
+  const equip_id = req.query.equip_id;
+  res.render("funcionario/abrir_os", { equip_id });
+});
+
+app.post("/funcionario/abrir_os", (req, res) => {
+  const { equip_id, descricao } = req.body;
+  db.run(
+    "INSERT INTO ordens_servico (equipamento_id, descricao, status, data_abertura) VALUES (?,?,?,datetime('now'))",
+    [equip_id, descricao, "Aberta"],
+    function (err) {
+      res.send("Ordem de serviço aberta com sucesso!");
+    }
+  );
+});
+
 // ------------------------------------------
 // RELATÓRIO PDF ESTILIZADO
 // ------------------------------------------
@@ -84,4 +220,12 @@ app.get("/admin/ordens/report", (req, res) => {
 
     doc.end();
   });
+});
+
+// ------------------------------------------
+// Inicialização do servidor
+// ------------------------------------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

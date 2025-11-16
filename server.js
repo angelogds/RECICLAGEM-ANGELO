@@ -1,6 +1,3 @@
-// ------------------------------------------
-// IMPORTAÇÕES
-// ------------------------------------------
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -9,7 +6,7 @@ const sqlite3 = require("sqlite3").verbose();
 const QRCode = require("qrcode");
 
 // ------------------------------------------
-// CONFIGURAÇÕES DO EXPRESS
+// CONFIG EXPRESS
 // ------------------------------------------
 const app = express();
 
@@ -18,20 +15,28 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Upload de arquivos temporários
+// Upload temporário
 const upload = multer({ dest: "uploads/tmp/" });
+
+// ------------------------------------------
+// PREPARA PASTAS
+// ------------------------------------------
+[
+  "uploads",
+  "uploads/equipamentos",
+  "uploads/ordens",
+  "data"
+].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
 
 // ------------------------------------------
 // BANCO DE DADOS
 // ------------------------------------------
-if (!fs.existsSync("uploads")) fs.mkdirSync("uploads", { recursive: true });
-if (!fs.existsSync("uploads/equipamentos")) fs.mkdirSync("uploads/equipamentos", { recursive: true });
-if (!fs.existsSync("uploads/ordens")) fs.mkdirSync("uploads/ordens", { recursive: true });
-if (!fs.existsSync("data")) fs.mkdirSync("data");
-
 const db = new sqlite3.Database("./data/database.sqlite");
 
 db.serialize(() => {
@@ -64,7 +69,6 @@ db.serialize(() => {
 // ------------------------------------------
 // ROTAS PRINCIPAIS
 // ------------------------------------------
-
 app.get("/", (req, res) => {
   res.redirect("/admin/login");
 });
@@ -78,9 +82,8 @@ app.get("/admin/dashboard", (req, res) => {
 });
 
 // ------------------------------------------
-// ROTAS DE EQUIPAMENTOS
+// EQUIPAMENTOS
 // ------------------------------------------
-
 app.get("/admin/equipamentos", (req, res) => {
   db.all("SELECT * FROM equipamentos ORDER BY nome ASC", [], (err, rows) => {
     res.render("admin/equipamentos", { equipamentos: rows || [] });
@@ -91,11 +94,11 @@ app.get("/admin/equipamentos/novo", (req, res) => {
   res.render("admin/equipamentos_novo");
 });
 
+// Upload da foto
 const uploadEquip = upload.single("foto");
 
 app.post("/admin/equipamentos/novo", uploadEquip, (req, res) => {
   const { nome, setor, correias_utilizadas } = req.body;
-
   let foto_path = null;
 
   if (req.file) {
@@ -111,14 +114,11 @@ app.post("/admin/equipamentos/novo", uploadEquip, (req, res) => {
       if (err) return res.send("Erro ao salvar equipamento: " + err.message);
 
       const novoId = this.lastID;
-
       const qrConteudo = `${req.protocol}://${req.get("host")}/funcionario/abrir_os?equip_id=${novoId}`;
       const qrPath = `uploads/equipamentos/qrcode_${novoId}.png`;
 
-      QRCode.toFile(qrPath, qrConteudo, {}, (err) => {
-        if (!err) {
-          db.run("UPDATE equipamentos SET qr_code=? WHERE id=?", [qrPath, novoId]);
-        }
+      QRCode.toFile(qrPath, qrConteudo, {}, () => {
+        db.run("UPDATE equipamentos SET qr_code=? WHERE id=?", [qrPath, novoId]);
       });
 
       res.redirect("/admin/equipamentos");
@@ -127,9 +127,8 @@ app.post("/admin/equipamentos/novo", uploadEquip, (req, res) => {
 });
 
 // ------------------------------------------
-// FUNCIONÁRIO — ABRIR OS
+// FUNCIONÁRIO / ABRIR OS
 // ------------------------------------------
-
 app.get("/funcionario/abrir_os", (req, res) => {
   const id = req.query.equip_id;
 
@@ -138,15 +137,11 @@ app.get("/funcionario/abrir_os", (req, res) => {
   });
 });
 
-// ------------------------------------------
-// SALVAR OS (APENAS 1 VEZ!!!)
-// ------------------------------------------
-
+// SALVAR OS
 const uploadOS = upload.single("foto_antes");
 
 app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
   const { equipamento_id, descricao } = req.body;
-
   let fotoAntes = null;
 
   if (req.file) {
@@ -168,13 +163,12 @@ app.post("/funcionario/abrir_os", uploadOS, (req, res) => {
 });
 
 // ------------------------------------------
-// LISTAR ORDENS
+// LISTAR OS
 // ------------------------------------------
-
 app.get("/admin/ordens", (req, res) => {
   db.all(
     `SELECT o.*, e.nome AS equipamento_nome
-     FROM ordens_servico o 
+     FROM ordens_servico o
      LEFT JOIN equipamentos e ON e.id = o.equipamento_id
      ORDER BY o.data_abertura DESC`,
     [],
@@ -187,6 +181,5 @@ app.get("/admin/ordens", (req, res) => {
 // ------------------------------------------
 // SERVIDOR
 // ------------------------------------------
-
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log("Rodando na porta", PORT));

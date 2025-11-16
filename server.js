@@ -221,6 +221,53 @@ app.get("/admin/ordens/report", (req, res) => {
     doc.end();
   });
 });
+const multer = require("multer");
+
+// Upload de fotos de equipamentos
+const storageEquipamentos = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/equipamentos");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const uploadEquipamentos = multer({ storage: storageEquipamentos });
+
+// Upload de fotos de ordens
+const storageOrdens = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/ordens");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const uploadOrdens = multer({ storage: storageOrdens });
+app.post("/admin/equipamentos", uploadEquipamentos.single("foto"), (req, res) => {
+  const { nome, descricao } = req.body;
+  const foto = req.file ? req.file.path : null;
+
+  db.run(
+    "INSERT INTO equipamentos (nome, descricao, foto) VALUES (?,?,?)",
+    [nome, descricao, foto],
+    function (err) {
+      res.redirect("/admin/equipamentos");
+    }
+  );
+});
+app.post("/admin/ordens", uploadOrdens.single("foto"), (req, res) => {
+  const { equipamento_id, descricao } = req.body;
+  const foto = req.file ? req.file.path : null;
+
+  db.run(
+    "INSERT INTO ordens_servico (equipamento_id, descricao, status, foto_antes, data_abertura) VALUES (?,?,?,?,datetime('now'))",
+    [equipamento_id, descricao, "Aberta", foto],
+    function (err) {
+      res.redirect("/admin/ordens");
+    }
+  );
+});
 
 // ------------------------------------------
 // Inicialização do servidor

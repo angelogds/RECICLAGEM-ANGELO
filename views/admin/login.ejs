@@ -1,8 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Admin</title>
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login do Administrador</h2>
 
-<%- include('../partials/cabecalho') %>
-<div class="card">
-  <h2>Login administrativo</h2>
-  <p class="small-muted">A autenticação real pode ser adicionada more tarde. Clique em Dashboard para entrar.</p>
-  <a href="/admin/dashboard"><button>Ir para Dashboard</button></a>
-</div>
-<%- include('../partials/rodape') %>
+    <% if (erro) { %>
+      <p style="color:red;"><%= erro %></p>
+    <% } %>
+
+    <form action="/admin/login" method="POST">
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email" required>
+
+      <label for="senha">Senha:</label>
+      <input type="password" name="senha" id="senha" required>
+
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+</body>
+</html>

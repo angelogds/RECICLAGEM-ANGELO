@@ -1,8 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Admin</title>
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <% include ../partials/cabecalho.ejs %>
 
-<%- include('../partials/cabecalho') %>
-<div class="card">
-  <h2>Visão geral</h2>
-  <p class="small-muted">Equipamentos cadastrados: <strong><%= stats.equipamentos %></strong></p>
-  <p class="small-muted">Ordens abertas: <strong><%= stats.ordens %></strong></p>
-</div>
-<%- include('../partials/rodape') %>
+  <main class="container">
+    <h1>Bem-vindo, <%= usuario.nome %> 👋</h1>
+
+    <section class="atalhos">
+      <h2>Atalhos Rápidos</h2>
+      <ul>
+        <li><a href="/admin/equipamentos">📦 Gerenciar Equipamentos</a></li>
+        <li><a href="/admin/equipamentos/novo">➕ Cadastrar Novo Equipamento</a></li>
+        <li><a href="/admin/ordens">🛠️ Ordens de Serviço</a></li>
+        <li><a href="/admin/logout">🚪 Sair</a></li>
+      </ul>
+    </section>
+
+    <section class="resumo">
+      <h2>Resumo</h2>
+      <p>Aqui você pode acompanhar os equipamentos cadastrados e as ordens de serviço em andamento.</p>
+    </section>
+  </main>
+
+  <% include ../partials/rodape.ejs %>
+</body>
+</html>

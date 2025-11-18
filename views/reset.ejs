@@ -1,103 +1,32 @@
+<% layout(false) %>
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Redefinir Senha</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #065336, #27ae60);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-        }
-
-        .box {
-            width: 360px;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.25);
-        }
-
-        .box h2 {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #065336;
-        }
-
-        label {
-            margin-top: 12px;
-            display: block;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 6px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 15px;
-        }
-
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            background: #065336;
-            border: none;
-            color: white;
-            border-radius: 6px;
-            font-size: 17px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #054a30;
-        }
-
-        .erro {
-            margin-top: 12px;
-            background: #ffdddd;
-            color: #c30000;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        a {
-            display: block;
-            margin-top: 15px;
-            text-align: center;
-            color: #065336;
-            text-decoration: none;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Redefinir Senha</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
+<body class="login-body">
 
-<body>
+<div class="login-container">
 
-<div class="box">
-    <h2>Nova Senha</h2>
+  <h2 class="login-title">Nova Senha</h2>
 
-    <% if (error) { %>
-        <div class="erro"><%= error %></div>
-    <% } %>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
 
-    <form method="POST" action="/reset/<%= token %>">
-        <label>Digite a nova senha:</label>
-        <input type="password" name="senha" placeholder="********" required>
+  <form class="login-card" method="POST" action="/reset/<%= token %>">
 
-        <button type="submit">Salvar nova senha</button>
-    </form>
+    <label>Nova Senha</label>
+    <input type="password" name="senha" required>
 
-    <a href="/login">Voltar ao login</a>
+    <button class="btn-save" style="width:100%">Salvar</button>
+  </form>
+
+  <a href="/login" class="login-forgot">Voltar ao login</a>
+
 </div>
 
 </body>

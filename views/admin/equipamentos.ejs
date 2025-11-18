@@ -1,2 +1,36 @@
-<% layout('layout', { title: "Equipamentos", active: "equipamentos" }) %>
+<h1 class="page-title">Equipamentos</h1>
 
+<a href="/equipamentos/novo" class="btn btn-green">+ Novo Equipamento</a>
+
+<br><br>
+
+<div class="card">
+<table class="table">
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Nome</th>
+  <th>Código</th>
+  <th>Local</th>
+  <th>Ações</th>
+</tr>
+</thead>
+
+<tbody>
+<% equipamentos.forEach(e => { %>
+<tr>
+  <td><%= e.id %></td>
+  <td><%= e.nome %></td>
+  <td><%= e.codigo %></td>
+  <td><%= e.local %></td>
+  <td>
+    <a href="/equipamentos/<%= e.id %>/editar" class="btn-table btn-edit">Editar</a>
+    <form style="display:inline" method="POST" action="/equipamentos/<%= e.id %>/delete">
+      <button class="btn-table btn-delete" onclick="return confirm('Excluir?')">Excluir</button>
+    </form>
+  </td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>

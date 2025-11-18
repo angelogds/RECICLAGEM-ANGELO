@@ -1,24 +1,18 @@
-<%
-    // Variáveis enviadas para o layout
-    const title = "Dashboard";
-    const active = "dashboard";
-%>
-
 <h1 class="page-title">Dashboard</h1>
 
 <div class="cards-container">
 
-    <div class="card card-green">
+    <div class="card">
         <h3>Total de Equipamentos</h3>
         <p class="card-number"><%= totais.equipamentos %></p>
     </div>
 
-    <div class="card card-blue">
+    <div class="card">
         <h3>OS Abertas</h3>
         <p class="card-number"><%= totais.abertas %></p>
     </div>
 
-    <div class="card card-orange">
+    <div class="card">
         <h3>OS Fechadas</h3>
         <p class="card-number"><%= totais.fechadas %></p>
     </div>
@@ -27,36 +21,73 @@
 
 <hr>
 
+<h2>Gráfico — Ordens por Tipo</h2>
+<canvas id="graficoTipos"></canvas>
+
+<h2 style="margin-top:40px;">Gráfico — OS por Mês</h2>
+<canvas id="graficoMeses"></canvas>
+
+<hr>
+
 <h2>Últimas Ordens de Serviço</h2>
 
-<table class="tabela">
+<table class="table">
     <thead>
         <tr>
             <th>ID</th>
             <th>Equipamento</th>
             <th>Tipo</th>
             <th>Status</th>
-            <th>Abertura</th>
+            <th>Data</th>
         </tr>
     </thead>
-
     <tbody>
         <% ultimas.forEach(item => { %>
             <tr>
                 <td><%= item.id %></td>
                 <td><%= item.equipamento_nome || '-' %></td>
-                <td><%= item.tipo || "-" %></td>
-
+                <td><%= item.tipo %></td>
                 <td>
                     <% if (item.status === 'aberta') { %>
-                        <span class="tag aberta">Aberta</span>
+                        <span class="status-open">Aberta</span>
                     <% } else { %>
-                        <span class="tag fechada">Fechada</span>
+                        <span class="status-closed">Fechada</span>
                     <% } %>
                 </td>
-
                 <td><%= item.aberta_em %></td>
             </tr>
         <% }) %>
     </tbody>
 </table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // ------------ GRÁFICO DE TIPOS --------------
+    const tiposLabels = <%- JSON.stringify(tipos.map(t => t.tipo)) %>;
+    const tiposValores = <%- JSON.stringify(tipos.map(t => t.total)) %>;
+
+    new Chart(document.getElementById("graficoTipos"), {
+        type: 'pie',
+        data: {
+            labels: tiposLabels,
+            datasets: [{
+                data: tiposValores
+            }]
+        }
+    });
+
+    // ------------ GRÁFICO POR MÊS --------------
+    const mesesLabels = <%- JSON.stringify(porMes.map(m => m.mes)) %>;
+    const mesesValores = <%- JSON.stringify(porMes.map(m => m.total)) %>;
+
+    new Chart(document.getElementById("graficoMeses"), {
+        type: 'bar',
+        data: {
+            labels: mesesLabels,
+            datasets: [{
+                data: mesesValores
+            }]
+        }
+    });
+</script>

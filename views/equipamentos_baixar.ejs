@@ -1,21 +1,22 @@
-<%
-  const title = "Baixar Correia";
-  const active = "equipamentos";
-%>
+<% layout('layout', { title: "Baixar Correia", active: "equipamentos" }) %>
 
-<h1 class="page-title">Baixa de Correia — <%= equipamento.nome %></h1>
+<h1 class="page-title">Baixar Correia — <%= equipamento.nome %></h1>
 
-<form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar-correia" class="form-card">
+<div class="card">
 
-  <label>Correia</label>
-  <select name="correia_id" required>
-    <% correias.forEach(c => { %>
-      <option value="<%= c.id %>"><%= c.nome %> (Em estoque: <%= c.quantidade %>)</option>
-    <% }) %>
-  </select>
+    <form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar-correia">
 
-  <label>Quantidade</label>
-  <input type="number" name="quantidade" min="1" value="1" required>
+        <label>Escolha a Correia</label>
+        <select name="correia_id" required>
+            <option value="">Selecione</option>
+            <% correias.forEach(c => { %>
+                <option value="<%= c.id %>"><%= c.nome %> — Estoque: <%= c.quantidade %></option>
+            <% }) %>
+        </select>
 
-  <button class="btn-save">Confirmar Baixa</button>
-</form>
+        <label>Quantidade utilizada</label>
+        <input type="number" name="quantidade" min="1" required>
+
+        <button class="btn-save">Dar Baixa</button>
+    </form>
+</div>

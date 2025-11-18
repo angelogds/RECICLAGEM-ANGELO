@@ -1,42 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Sistema Manutenção</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/css/style.css">
-</head>
-
-<body>
-
-<div class="layout">
-
-    <aside class="sidebar">
-        <div class="sidebar-header">Sistema</div>
-
-        <nav class="sidebar-menu">
-            <a href="/" class="<%= active==='dashboard'?'active':'' %>">Dashboard</a>
-            <a href="/equipamentos" class="<%= active==='equipamentos'?'active':'' %>">Equipamentos</a>
-            <a href="/ordens" class="<%= active==='ordens'?'active':'' %>">Ordens</a>
-            <a href="/ordens/novo" class="<%= active==='abrir_os'?'active':'' %>">Abrir OS</a>
-            <a href="/logout">Sair</a>
-        </nav>
-    </aside>
-
-    <main class="main">
-        <header class="topbar">
-            <div><strong>Sistema CDG</strong></div>
-            <div>Olá, <%= session?.user?.nome || '' %></div>
-        </header>
-
-        <section class="content">
-            <%- body %>
-        </section>
-
-        <footer class="footer">CDG • 2025</footer>
-    </main>
-
-</div>
-
-</body>
-</html>
+<nav class="sidebar-menu">
+  <a href="/" class="<%= active==='dashboard'?'active':'' %>">Dashboard</a>
+  <a href="/equipamentos" class="<%= active==='equipamentos'?'active':'' %>">Equipamentos</a>
+  <a href="/ordens" class="<%= active==='ordens'?'active':'' %>">Ordens</a>
+  <a href="/ordens/novo" class="<%= active==='abrir_os'?'active':'' %>">Abrir OS</a>
+  <% if (session && session.role === 'admin') { %>
+    <a href="/users" class="<%= active==='users'?'active':'' %>">Usuários</a>
+  <% } %>
+  <a href="/logout">Sair</a>
+</nav>

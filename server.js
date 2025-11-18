@@ -696,6 +696,204 @@ app.post('/equipamentos/:id/delete', authRequired, async (req, res) => {
     res.send('Erro ao deletar equipamento.');
   }
 });
+// ------------------ ROTAS: CORREIAS + ASSOCIAÇÕES + BAIXA ------------------
+
+// Listar correias (estoque)
+app.get('/correias', authRequired, async (req, res) => {
+  try {
+    const correias = await allAsync('SELECT * FROM correias ORDER BY nome');
+    res.render('correias', { correias, active: 'correias' });
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao listar correias.');
+  }
+});
+
+// Form novo - criar correia
+app.get('/correias/novo', authRequired, (req, res) => {
+  res.render('correias_novo', { correia: null, active: 'correias', error: null });
+});
+
+app.post('/correias/novo', authRequired, async (req, res) => {
+  try {
+    const { nome, modelo, medida, quantidade } = req.body;
+    await runAsync(
+      `INSERT INTO correias (nome, modelo, medida, quantidade) VALUES (?, ?, ?, ?)`,
+      [nome, modelo, medida, parseInt(quantidade || 0, 10)]
+    );
+    res.redirect('/correias');
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao criar correia.');
+  }
+});
+
+// Editar correia
+app.get('/correias/:id/editar', authRequired, async (req, res) => {
+  try {
+    const correia = await getAsync('SELECT * FROM correias WHERE id = ?', [req.params.id]);
+    if (!correia) return res.redirect('/correias');
+    res.render('correias_novo', { correia, active: 'correias', error: null });
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao carregar correia.');
+  }
+});
+
+app.post('/correias/:id/editar', authRequired, async (req, res) => {
+  try {
+    const { nome, modelo, medida, quantidade } = req.body;
+    await runAsync(
+      `UPDATE correias SET nome=?, modelo=?, medida=?, quantidade=? WHERE id=?`,
+      [nome, modelo, medida, parseInt(quantidade || 0, 10), req.params.id]
+    );
+    res.redirect('/correias');
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao atualizar correia.');
+  }
+});
+
+// Deletar correia
+app.post('/correias/:id/delete', authRequired, async (req, res) => {
+  try {
+    await runAsync('DELETE FROM correias WHERE id = ?', [req.params.id]);
+    res.redirect('/correias');
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao deletar correia.');
+  }
+});
+
+// ------------------ Associação correias <-> equipamento ------------------
+
+// Form associação (listar correias e estados)
+app.get('/equipamentos/:id/correias', authRequired, async (req, res) => {
+  try {
+    const equipamento = await getAsync('SELECT * FROM equipamentos WHERE id = ?', [req.params.id]);
+    if (!equipamento) return res.send('Equipamento não encontrado.');
+
+    const correias = await allAsync('SELECT * FROM correias ORDER BY nome');
+
+    // correias já associadas
+    const ligados = await allAsync('SELECT correia_id, quantidade_usada FROM correias_equipamentos WHERE equipamento_id = ?', [req.params.id]);
+
+    // map para facilitar
+    const mapLigados = {};
+    ligados.forEach(l => mapLigados[l.correia_id] = l.quantidade_usada);
+
+    res.render('equipamento_correias', { equipamento, correias, mapLigados, active: 'equipamentos' });
+
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao carregar associação de correias.');
+  }
+});
+
+// Salvar associações
+app.post('/equipamentos/:id/correias', authRequired, async (req, res) => {
+  try {
+    const equipamento_id = req.params.id;
+    // req.body.correia pode ser array de ids; req.body.qtd_<id> quantity per correia
+    const correiaIds = Array.isArray(req.body.correia) ? req.body.correia : (req.body.correia ? [req.body.correia] : []);
+
+    // limpar antigas
+    await runAsync('DELETE FROM correias_equipamentos WHERE equipamento_id = ?', [equipamento_id]);
+
+    // inserir novas
+    for (const cid of correiaIds) {
+      const q = parseInt(req.body[`qtd_${cid}`] || 1, 10);
+      await runAsync(
+        `INSERT INTO correias_equipamentos (equipamento_id, correia_id, quantidade_usada) VALUES (?, ?, ?)`,
+        [equipamento_id, cid, q]
+      );
+    }
+
+    res.redirect('/equipamentos/' + equipamento_id);
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao salvar associações.');
+  }
+});
+
+// ------------------ Baixa via equipamento (fluxo QR → menu → baixa) ------------------
+
+// Abrir formulário de baixa (pré-carrega correias)
+app.get('/equipamentos/:id/baixar', authRequired, async (req, res) => {
+  try {
+    const equipamento = await getAsync('SELECT * FROM equipamentos WHERE id = ?', [req.params.id]);
+    if (!equipamento) return res.send('Equipamento não encontrado.');
+
+    // listar correias (padrão: mostrar todas; podemos pré-selecionar as associadas)
+    const correias = await allAsync('SELECT * FROM correias ORDER BY nome');
+
+    res.render('equipamentos_baixar', { equipamento, correias, active: 'equipamentos' });
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao abrir formulário de baixa.');
+  }
+});
+
+// Rota de baixa – debita estoque e registra histórico
+app.post('/equipamentos/:id/baixar-correia', authRequired, async (req, res) => {
+  try {
+    const equipamento_id = req.params.id;
+    const correia_id = parseInt(req.body.correia_id, 10);
+    const quantidade = parseInt(req.body.quantidade, 10);
+
+    if (!correia_id || !quantidade || quantidade <= 0) {
+      return res.send('Quantidade inválida.');
+    }
+
+    // Checar estoque atual
+    const correia = await getAsync('SELECT * FROM correias WHERE id = ?', [correia_id]);
+    if (!correia) return res.send('Correia não encontrada.');
+
+    if (correia.quantidade < quantidade) {
+      return res.send('Estoque insuficiente. Atualize o estoque antes.');
+    }
+
+    // Registrar consumo e abater estoque
+    await registrarConsumoCorreia(equipamento_id, correia_id, quantidade);
+
+    // opcional: criar notificação
+    // await criarNotificacao(req.session.userId, 'Correia usada', `Foram usadas ${quantidade}x ${correia.nome} na máquina #${equipamento_id}`, 'info');
+
+    // redirecionar de volta ao menu ou tela do equipamento
+    res.redirect('/equipamento/' + equipamento_id + '/menu');
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao debitar correia.');
+  }
+});
+
+// ------------------ Relatório / Dashboard de Consumo ------------------
+
+// Relatório mensal (interface)
+app.get('/correias/relatorio', authRequired, async (req, res) => {
+  try {
+    // parâmetro mês opcional: YYYY-MM (default: atual)
+    const mes = req.query.mes || (new Date()).toISOString().slice(0,7);
+
+    const rel = await allAsync(`
+      SELECT 
+        e.nome AS equipamento,
+        c.nome AS correia,
+        SUM(cc.quantidade) AS total
+      FROM consumo_correias cc
+      LEFT JOIN equipamentos e ON e.id = cc.equipamento_id
+      LEFT JOIN correias c ON c.id = cc.correia_id
+      WHERE strftime('%Y-%m', cc.data) = ?
+      GROUP BY equipamento, correia
+      ORDER BY equipamento, correia
+    `, [mes]);
+
+    res.render('relatorio_correias', { rel, mes, active: 'correias' });
+  } catch (err) {
+    console.error(err);
+    res.send('Erro ao gerar relatório.');
+  }
+});
 
 // ---------------------- (FIM BLOCO 6) ----------------------
 // ---------------------- BLOCO 7/9 ----------------------

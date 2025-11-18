@@ -197,3 +197,16 @@ header .user-info {
         justify-content: space-between;
     }
 }
+.btn-qr {
+    padding: 6px 10px;
+    background: #2e7d32;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.btn-qr:hover {
+    background: #1b5e20;
+}

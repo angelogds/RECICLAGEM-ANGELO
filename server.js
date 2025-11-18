@@ -736,22 +736,42 @@ app.get('/solicitacao/pdf/:id', authRequired, async (req, res) => {
 });
 
 // ---------------------- DASHBOARD ----------------------
+// DASHBOARD COMPLETO (estatísticas + gráficos)
+
 app.get('/', authRequired, async (req, res) => {
   try {
+
+    // --- Totais gerais ---
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
-    const tipos = await allAsync(`SELECT tipo, COUNT(*) AS total FROM ordens GROUP BY tipo`);
-    const porMes = await allAsync(`
-      SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
-      FROM ordens GROUP BY mes ORDER BY mes ASC
+
+    // --- OS por tipo (para gráfico pizza) ---
+    const tipos = await allAsync(`
+      SELECT tipo, COUNT(*) AS total
+      FROM ordens
+      GROUP BY tipo
     `);
+
+    // --- OS por mês (gráfico barra) ---
+    const porMes = await allAsync(`
+      SELECT strftime('%Y-%m', aberta_em) AS mes,
+             COUNT(*) AS total
+      FROM ordens
+      GROUP BY mes
+      ORDER BY mes ASC
+    `);
+
+    // --- Últimas ordens ---
     const ultimas = await allAsync(`
       SELECT o.*, e.nome AS equipamento_nome
       FROM ordens o
       LEFT JOIN equipamentos e ON e.id = o.equipamento_id
-      ORDER BY o.aberta_em DESC LIMIT 6
+      ORDER BY o.aberta_em DESC
+      LIMIT 6
     `);
+
+    // Renderizar view
     res.render('admin/dashboard', {
       active: 'dashboard',
       totais: {
@@ -759,13 +779,17 @@ app.get('/', authRequired, async (req, res) => {
         abertas: totalAbertas?.c || 0,
         fechadas: totalFechadas?.c || 0
       },
-      tipos, porMes, ultimas
+      tipos,
+      porMes,
+      ultimas
     });
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao carregar dashboard.');
   }
 });
+
 
 // ---------------------- API JSON (opcionais) ----------------------
 app.get('/api/equipamentos', async (req, res) => {

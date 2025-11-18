@@ -1,3 +1,23 @@
+//-----------------------------------------------------
+// EXECUTAR SEED AUTOMATICAMENTE (APENAS 1 VEZ)
+//-----------------------------------------------------
+const fsExtra = require("fs");
+
+if (fsExtra.existsSync("./seed.js")) {
+  console.log("➡ Executando seed.js automaticamente...");
+
+  require("./seed.js");
+
+  // remover após executar
+  setTimeout(() => {
+    try {
+      fsExtra.unlinkSync("./seed.js");
+      console.log("✔ seed.js executado e removido.");
+    } catch (e) {
+      console.log("Erro removendo seed.js:", e);
+    }
+  }, 2000);
+}
 // server.js — BLOCO 1/9
 // Cabeçalho, imports, configuração inicial, sessão, layout e uploads
 

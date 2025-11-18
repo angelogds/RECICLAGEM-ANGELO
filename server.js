@@ -189,6 +189,23 @@ function getAsync(sql, params = []) {
     });
   });
 }
+// ------------------ HELPERS (Correias) ------------------
+
+// Helper: registra consumo e atualiza estoque atomically
+async function registrarConsumoCorreia(equipamento_id, correia_id, quantidade) {
+  // diminuir estoque
+  await runAsync(
+    `UPDATE correias SET quantidade = quantidade - ? WHERE id = ?`,
+    [quantidade, correia_id]
+  );
+
+  // registrar histórico
+  await runAsync(
+    `INSERT INTO consumo_correias (equipamento_id, correia_id, quantidade) VALUES (?, ?, ?)`,
+    [equipamento_id, correia_id, quantidade]
+  );
+}
+
 // Tabela de correias (estoque)
 db.run(`
   CREATE TABLE IF NOT EXISTS correias (

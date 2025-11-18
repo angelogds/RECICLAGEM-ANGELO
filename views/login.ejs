@@ -1,119 +1,35 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Login - Sistema de Manutenção</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #065336, #27ae60);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-        }
-
-        .login-box {
-            width: 350px;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
-        }
-
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #065336;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 12px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 6px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            background: #065336;
-            border: none;
-            color: white;
-            font-size: 17px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #054a30;
-        }
-
-        .erro {
-            margin-top: 15px;
-            background: #ffdddd;
-            color: #c30000;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .links {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .links a {
-            color: #065336;
-            text-decoration: none;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
+<body class="login-body">
 
-<body>
+<div class="login-container">
 
-    <div class="login-box">
+  <h2 class="login-title">Acesso ao Sistema</h2>
 
-        <h2>CAMPO DO GADO</h2>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
 
-        <% if (error) { %>
-            <div class="erro"><%= error %></div>
-        <% } %>
+  <form class="login-card" method="POST" action="/login">
+    <label>Usuário</label>
+    <input type="text" name="usuario" required>
 
-        <form method="POST" action="/login">
+    <label>Senha</label>
+    <input type="password" name="senha" required>
 
-            <label>Usuário</label>
-            <input name="usuario" placeholder="Digite seu usuário" required>
+    <button class="btn-save" style="width:100%">Entrar</button>
+  </form>
 
-            <label>Senha</label>
-            <input type="password" name="senha" placeholder="********" required>
+  <a href="/forgot" class="login-forgot">Esqueci minha senha</a>
 
-            <button type="submit">Entrar</button>
-        </form>
-
-        <div class="links">
-            <a href="/forgot">Esqueci minha senha</a>
-        </div>
-
-    </div>
+</div>
 
 </body>
 </html>

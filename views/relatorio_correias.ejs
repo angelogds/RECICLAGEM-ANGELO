@@ -1,29 +1,33 @@
-<%
-  const title = "Relatório de Correias";
-  const active = "correias";
-%>
+<% layout('layout', { title: "Relatório de Consumo de Correias", active: "correias" }) %>
 
-<h1 class="page-title">Relatório de Correias — Mês: <%= mes %></h1>
+<h1 class="page-title">Relatório de Consumo de Correias</h1>
 
-<form method="get" action="/correias/relatorio">
-  <label>Escolher mês (YYYY-MM)</label>
-  <input name="mes" value="<%= mes %>">
-  <button class="btn-save">Filtrar</button>
+<form method="GET" class="form-card" style="max-width:300px;">
+    <label>Mês</label>
+    <input type="month" name="mes" value="<%= mes %>">
+    <button class="btn-save">Filtrar</button>
 </form>
 
-<table class="tabela">
-  <thead><tr><th>Equipamento</th><th>Correia</th><th>Total</th></tr></thead>
-  <tbody>
-    <% if (rel.length === 0) { %>
-      <tr><td colspan="3" class="no-data">Nenhum consumo registrado neste mês.</td></tr>
-    <% } %>
+<table class="tabela" style="margin-top:20px;">
+    <thead>
+        <tr>
+            <th>Equipamento</th>
+            <th>Correia</th>
+            <th>Total Usado</th>
+        </tr>
+    </thead>
 
-    <% rel.forEach(r => { %>
-      <tr>
-        <td><%= r.equipamento %></td>
-        <td><%= r.correia %></td>
-        <td><%= r.total %></td>
-      </tr>
-    <% }) %>
-  </tbody>
+    <tbody>
+        <% if (rel.length === 0) { %>
+            <tr><td colspan="3">Nenhum consumo registrado neste mês.</td></tr>
+        <% } %>
+
+        <% rel.forEach(r => { %>
+            <tr>
+                <td><%= r.equipamento %></td>
+                <td><%= r.correia %></td>
+                <td><strong><%= r.total %></strong></td>
+            </tr>
+        <% }) %>
+    </tbody>
 </table>

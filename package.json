@@ -1,7 +1,7 @@
 {
   "name": "manutencao-reciclagem",
   "version": "1.0.0",
-  "description": "Sistema de manutenção CDG com dashboard, CRUD, OS e login e users",
+  "description": "Sistema de manutenção CDG com dashboard, CRUD, OS, login e users",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -17,7 +17,7 @@
     "nodemailer": "^6.9.4",
     "pdfkit": "^0.15.0",
     "sqlite3": "^5.1.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
     "qrcode": "^1.5.3"
- }
+  }
 }

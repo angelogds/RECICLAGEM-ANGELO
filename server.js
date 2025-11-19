@@ -709,15 +709,24 @@ app.get('/equipamentos/:id/historico', authRequired, async (req, res) => {
   }
 });
 
-// ========== ORDENS DE SERVIÇO (OS) ==========
-// ORDENS: admin, funcionario, operador (operador vê apenas as próprias OS)
+// ============================================================
+// ========== ORDENS DE SERVIÇO (OS) — COM PERMISSÕES ==========
+// ============================================================
+
+// Aplicar middleware de login e roles permitidos
 app.use('/ordens', authRequired, allowRoles('admin', 'funcionario', 'operador'));
 
-// Listar ordens (operador só vê as dele)
+// ---------------------------------------------
+// LISTAR ORDENS
+// - operador vê apenas as próprias
+// - admin e funcionário veem todas
+// ---------------------------------------------
 app.get('/ordens', async (req, res) => {
   try {
     let ordens;
+
     if (req.session.role === 'operador') {
+      // Apenas OS do próprio operador
       ordens = await allAsync(`
         SELECT o.*, e.nome AS equipamento_nome
         FROM ordens o
@@ -726,6 +735,7 @@ app.get('/ordens', async (req, res) => {
         ORDER BY o.aberta_em DESC
       `, [req.session.usuario]);
     } else {
+      // Admin e funcionário veem tudo
       ordens = await allAsync(`
         SELECT o.*, e.nome AS equipamento_nome
         FROM ordens o
@@ -733,39 +743,56 @@ app.get('/ordens', async (req, res) => {
         ORDER BY o.aberta_em DESC
       `);
     }
+
     res.render('ordens', { ordens, active: 'ordens' });
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao listar ordens.');
   }
 });
 
-// Form — abrir OS
+// ---------------------------------------------
+// FORM — ABRIR OS
+// ---------------------------------------------
 app.get('/ordens/novo', async (req, res) => {
   try {
-    // equipamentos list shown to create OS (operators see equipment list? operator can't access equipamentos page, but can choose equipamento here)
-    const equipamentos = await allAsync(`SELECT id, nome FROM equipamentos ORDER BY nome ASC`);
+    const equipamentos = await allAsync(`
+      SELECT id, nome FROM equipamentos ORDER BY nome ASC
+    `);
+
     res.render('abrir_os', { equipamentos, active: 'abrir_os' });
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao abrir formulário de OS.');
   }
 });
 
-// Criar OS — solicitante preenchido automaticamente com req.session.usuario (opção A)
+// ---------------------------------------------
+// CRIAR OS (solicitante sempre = usuário logado)
+// ---------------------------------------------
 app.post('/ordens', async (req, res) => {
   try {
     const { equipamento_id, tipo, descricao } = req.body;
-    const solicitante = req.session.usuario; // sempre automatico
-    await runAsync(`INSERT INTO ordens (equipamento_id, solicitante, tipo, descricao, status) VALUES (?, ?, ?, ?, 'aberta')`, [equipamento_id || null, solicitante, tipo, descricao]);
+    const solicitante = req.session.usuario;
+
+    await runAsync(`
+      INSERT INTO ordens (equipamento_id, solicitante, tipo, descricao, status)
+      VALUES (?, ?, ?, ?, 'aberta')
+    `, [equipamento_id || null, solicitante, tipo, descricao]);
+
     res.redirect('/ordens');
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao criar OS.');
   }
 });
 
-// Ver OS / Form fechar
+// ---------------------------------------------
+// VER OS
+// ---------------------------------------------
 app.get('/ordens/:id', async (req, res) => {
   try {
     const ordem = await getAsync(`
@@ -777,38 +804,54 @@ app.get('/ordens/:id', async (req, res) => {
 
     if (!ordem) return res.send('Ordem não encontrada.');
 
-    // If operator: ensure can access only own OS
+    // Operador só pode ver as próprias OS
     if (req.session.role === 'operador' && ordem.solicitante !== req.session.usuario) {
       return res.status(403).send('Acesso negado.');
     }
 
     res.render('ordens_fechar', { ordem, active: 'ordens' });
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao carregar OS.');
   }
 });
 
-// Fechar OS
+// ---------------------------------------------
+// FECHAR OS
+// ---------------------------------------------
 app.post('/ordens/:id/fechar', async (req, res) => {
   try {
-    // Verify permission: operator can only close own OS
-    const ordem = await getAsync(`SELECT solicitante FROM ordens WHERE id = ?`, [req.params.id]);
+    const ordem = await getAsync(`
+      SELECT solicitante FROM ordens WHERE id = ?
+    `, [req.params.id]);
+
     if (!ordem) return res.send('Ordem não encontrada.');
 
+    // Operador só pode fechar as próprias OS
     if (req.session.role === 'operador' && ordem.solicitante !== req.session.usuario) {
       return res.status(403).send('Acesso negado.');
     }
 
-    await runAsync(`UPDATE ordens SET status='fechada', resultado=?, fechada_em=CURRENT_TIMESTAMP WHERE id=?`, [req.body.resultado, req.params.id]);
+    await runAsync(`
+      UPDATE ordens
+      SET status='fechada',
+          resultado=?,
+          fechada_em=CURRENT_TIMESTAMP
+      WHERE id=?
+    `, [req.body.resultado, req.params.id]);
+
     res.redirect('/ordens');
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao fechar OS.');
   }
 });
 
-// Gerar PDF da OS
+// ---------------------------------------------
+// PDF DA OS (com proteção de acesso)
+// ---------------------------------------------
 app.get('/solicitacao/pdf/:id', async (req, res) => {
   try {
     const ordem = await getAsync(`
@@ -817,72 +860,49 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
       LEFT JOIN equipamentos e ON e.id = o.equipamento_id
       WHERE o.id = ?
     `, [req.params.id]);
+
     if (!ordem) return res.send('Ordem não encontrada.');
 
-    // permission check: operator only own
+    // Operador apenas suas OS
     if (req.session.role === 'operador' && ordem.solicitante !== req.session.usuario) {
       return res.status(403).send('Acesso negado.');
     }
 
     const doc = new PDFDocument({ margin: 40 });
-    res.setHeader('Content-Disposition', `attachment; filename=OS_${ordem.id}.pdf`);
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=OS_${ordem.id}.pdf`
+    );
     res.setHeader('Content-Type', 'application/pdf');
+
     doc.pipe(res);
-    doc.fontSize(20).text('Ordem de Serviço (OS)', { align: 'center' }).moveDown();
+
+    doc.fontSize(20).text('Ordem de Serviço (OS)', { align: 'center' });
+    doc.moveDown();
+
     doc.fontSize(12).text(`ID da OS: ${ordem.id}`);
-    doc.text(`Solicitante: ${ordem.solicitante || '-'}`);
-    doc.text(`Tipo: ${ordem.tipo || '-'}`);
-    doc.text(`Equipamento: ${ordem.equipamento_nome || '-'} (${ordem.equipamento_codigo || '-'})`).moveDown();
-    doc.text('Descrição do problema:');
-    doc.fontSize(11).text(ordem.descricao || '-', { indent: 10 }).moveDown();
+    doc.text(`Solicitante: ${ordem.solicitante}`);
+    doc.text(`Tipo: ${ordem.tipo}`);
+    doc.text(`Equipamento: ${ordem.equipamento_nome} (${ordem.equipamento_codigo})`);
+    doc.moveDown();
+
+    doc.text('Descrição:');
+    doc.fontSize(11).text(ordem.descricao, { indent: 10 });
+    doc.moveDown();
+
     doc.fontSize(12).text(`Status: ${ordem.status}`);
     if (ordem.status === 'fechada') {
       doc.text(`Fechada em: ${ordem.fechada_em}`);
-      doc.text(`Resultado: ${ordem.resultado || '-'}`);
+      doc.text(`Resultado: ${ordem.resultado}`);
     }
-    doc.moveDown(2).text('Assinatura: ____________________________');
+
+    doc.moveDown(2);
+    doc.text('Assinatura: ____________________________');
     doc.end();
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao gerar PDF.');
   }
-});
-
-// ========== DASHBOARD ==========
-app.get('/', authRequired, async (req, res) => {
-  try {
-    const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
-    const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
-    const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
-    const tipos = await allAsync(`SELECT tipo, COUNT(*) AS total FROM ordens GROUP BY tipo`);
-    const porMes = await allAsync(`SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total FROM ordens GROUP BY mes ORDER BY mes ASC`);
-    const ultimas = await allAsync(`
-      SELECT o.*, e.nome AS equipamento_nome
-      FROM ordens o
-      LEFT JOIN equipamentos e ON e.id = o.equipamento_id
-      ORDER BY o.aberta_em DESC
-      LIMIT 6
-    `);
-
-    res.render('admin/dashboard', {
-      active: 'dashboard',
-      totais: {
-        equipamentos: totalEquip?.c || 0,
-        abertas: totalAbertas?.c || 0,
-        fechadas: totalFechadas?.c || 0
-      },
-      tipos,
-      porMes,
-      ultimas
-    });
-  } catch (err) {
-    console.error(err);
-    res.send('Erro ao carregar dashboard.');
-  }
-});
-
-// ========== START SERVER ==========
-app.listen(PORT, () => {
-  console.log(`Servidor ativo na porta ${PORT}`);
-  console.log(`SQLite conectado em ${DB_FILE}`);
 });

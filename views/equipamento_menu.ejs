@@ -1,40 +1,44 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Menu do Equipamento</title>
-  <link rel="stylesheet" href="/css/mobile.css">
-</head>
+<h1 class="page-title">Máquina: <%= equipamento.nome %></h1>
 
-<body class="mobile-body">
+<div class="menu-maquina">
 
-<div class="mobile-container">
-
-  <h2 class="mobile-title"><%= equipamento.nome %></h2>
-  <p class="mobile-sub">Código: <%= equipamento.codigo || '-' %></p>
-
-  <div class="mobile-buttons">
-
-    <a class="mobile-btn" href="/ordens/novo?equip=<%= equipamento.id %>">
-      📋 Abrir Ordem de Serviço
+    <a href="/equipamentos/<%= equipamento.id %>/baixar" class="btn-menu">
+        🔧 Baixar Correia
     </a>
 
-    <a class="mobile-btn" href="/equipamentos/<%= equipamento.id %>/baixar">
-      🔧 Dar Baixa em Correias
+    <a href="/ordens/novo?equip=<%= equipamento.id %>" class="btn-menu">
+        📝 Abrir OS
     </a>
 
-    <a class="mobile-btn" href="/equipamentos/<%= equipamento.id %>/historico">
-      📑 Histórico da Máquina
+    <a href="/equipamentos/<%= equipamento.id %>/historico" class="btn-menu">
+        📑 Histórico
     </a>
 
-    <a class="mobile-btn" href="/equipamentos/<%= equipamento.id %>">
-      🖥️ Ver Detalhes
+    <a href="/equipamentos/<%= equipamento.id %>/editar" class="btn-menu">
+        ⚙️ Editar Equipamento
     </a>
-
-  </div>
 
 </div>
 
-</body>
-</html>
+<style>
+.menu-maquina {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-menu {
+    display: block;
+    background: #1e88e5;
+    padding: 15px;
+    color: white;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+}
+.btn-menu:hover {
+    background: #0d47a1;
+}
+</style>

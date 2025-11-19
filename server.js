@@ -1,12 +1,7 @@
 // server.js — Sistema de Manutenção completo (roles, correias, QR, uploads, seed)
 // Requer: express, express-ejs-layouts, express-session, ejs, sqlite3, multer, pdfkit, bcrypt, nodemailer, uuid, qrcode
 // =======================
-// PÁGINA DE INÍCIO (PÚBLICA)
-app.use((req, res, next) => {
-// =======================
-app.get('/inicio', (req, res) => {
-  res.render('inicio', { layout: false });
-});
+
 
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
@@ -905,4 +900,68 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
     console.error(err);
     res.send('Erro ao gerar PDF.');
   }
+});
+// ---------------------------------------------
+// QR CODE DO EQUIPAMENTO (MENU MOBILE)
+// ---------------------------------------------
+app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
+  try {
+    const equipamento = await getAsync(`
+      SELECT * FROM equipamentos WHERE id = ?
+    `, [req.params.id]);
+
+    if (!equipamento) return res.send("Equipamento não encontrado.");
+
+    res.render("equipamento_menu", {
+      equipamento,
+      active: "equipamentos",
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.send("Erro ao abrir menu do equipamento.");
+  }
+});
+
+
+// ---------------------------------------------
+// DASHBOARD
+// ---------------------------------------------
+app.get('/', authRequired, async (req, res) => {
+  try {
+    const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
+    const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
+    const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
+
+    const ultimas = await allAsync(`
+      SELECT o.*, e.nome AS equipamento_nome
+      FROM ordens o
+      LEFT JOIN equipamentos e ON e.id = o.equipamento_id
+      ORDER BY o.aberta_em DESC
+      LIMIT 6
+    `);
+
+    res.render("admin/dashboard", {
+      totais: {
+        equipamentos: totalEquip.c,
+        abertas: totalAbertas.c,
+        fechadas: totalFechadas.c
+      },
+      ultimas,
+      active: "dashboard",
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.send("Erro ao carregar dashboard.");
+  }
+});
+
+
+// ---------------------------------------------
+// INICIAR SERVIDOR
+// ---------------------------------------------
+app.listen(PORT, () => {
+  console.log(`Servidor ativo na porta ${PORT}`);
+  console.log(`SQLite conectado em ${DB_FILE}`);
 });

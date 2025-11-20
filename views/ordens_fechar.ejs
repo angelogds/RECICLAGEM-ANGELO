@@ -34,15 +34,18 @@
             <p style="color:#777;">Nenhuma foto enviada.</p>
         <% } else { %>
             <% fotos.forEach(f => { %>
-                <div class="foto-item">
-                    <img src="/<%= f.caminho %>" onclick="abrirZoom('/<%= f.caminho %>')" />
-                    <span class="foto-legenda">
-                        <%= f.tipo === 'abertura' ? 'Abertura' : 'Fechamento' %>
-                    </span>
-                </div>
-            <% }) %>
-        <% } %>
-        </div>
+               <div class="foto-item">
+    <img src="/<%= f.caminho %>" onclick="abrirZoom('/<%= f.caminho %>')">
+
+    <span class="foto-legenda">
+        <%= f.tipo === 'abertura' ? 'Abertura' : 'Fechamento' %>
+    </span>
+
+    <form method="POST" action="/os_fotos/<%= f.id %>/delete" onsubmit="return confirm('Excluir esta foto?')">
+        <button class="btn-delete-foto">Excluir</button>
+    </form>
+</div>
+
 
         <!-- MODAL -->
         <div id="zoomModal" class="zoom-modal" onclick="fecharZoom()">

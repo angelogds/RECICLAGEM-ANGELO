@@ -923,22 +923,16 @@ app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
   }
 });
 
-
 // ---------------------------------------------
-// DASHBOARD
-// ---------------------------------------------
-// ---------------------------------------------
-// DASHBOARD
+// DASHBOARD COMPLETO COM GRÁFICO POR MÊS
 // ---------------------------------------------
 app.get('/', authRequired, async (req, res) => {
   try {
 
-    // Totais
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
 
-    // Últimas OS
     const ultimas = await allAsync(`
       SELECT o.*, e.nome AS equipamento_nome
       FROM ordens o
@@ -947,7 +941,7 @@ app.get('/', authRequired, async (req, res) => {
       LIMIT 6
     `);
 
-    // Gráfico por tipo de correia
+    // -------- GRÁFICO DE TIPOS --------
     const tipos = await allAsync(`
       SELECT modelo AS tipo, COUNT(*) AS total
       FROM correias
@@ -955,19 +949,12 @@ app.get('/', authRequired, async (req, res) => {
       ORDER BY modelo
     `);
 
-    // Gráfico por dia
-    const porDia = await allAsync(`
-      SELECT DATE(aberta_em) AS dia, COUNT(*) AS total
-      FROM ordens
-      GROUP BY DATE(aberta_em)
-      ORDER BY dia ASC
-    `);
-
-    // Gráfico por mês
+    // -------- GRÁFICO POR MÊS --------
     const porMes = await allAsync(`
-      SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
+      SELECT strftime('%Y-%m', aberta_em) AS mes,
+             COUNT(*) AS total
       FROM ordens
-      GROUP BY strftime('%Y-%m', aberta_em)
+      GROUP BY mes
       ORDER BY mes ASC
     `);
 
@@ -979,9 +966,8 @@ app.get('/', authRequired, async (req, res) => {
       },
       ultimas,
       tipos,
-      porDia,
       porMes,
-      active: "dashboard"
+      active: "dashboard",
     });
 
   } catch (err) {
@@ -989,3 +975,4 @@ app.get('/', authRequired, async (req, res) => {
     res.send("Erro ao carregar dashboard.");
   }
 });
+

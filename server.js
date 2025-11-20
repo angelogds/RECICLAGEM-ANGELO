@@ -868,10 +868,11 @@ app.post('/ordens/:id/fechar', upload.array('fotos', 10), async (req, res) => {
 });
 
 // ---------------------------------------------
-// PDF DA OS (com proteção de acesso)
+// PDF DA OS (com fotos incluídas)
 // ---------------------------------------------
 app.get('/solicitacao/pdf/:id', async (req, res) => {
   try {
+
     const ordem = await getAsync(`
       SELECT o.*, e.nome AS equipamento_nome, e.codigo AS equipamento_codigo
       FROM ordens o
@@ -881,10 +882,11 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
 
     if (!ordem) return res.send('Ordem não encontrada.');
 
-    // Operador apenas suas OS
     if (req.session.role === 'operador' && ordem.solicitante !== req.session.usuario) {
       return res.status(403).send('Acesso negado.');
     }
+
+    const fotos = await allAsync(`SELECT * FROM os_fotos WHERE os_id = ?`, [req.params.id]);
 
     const doc = new PDFDocument({ margin: 40 });
     res.setHeader('Content-Disposition', `attachment; filename=OS_${ordem.id}.pdf`);
@@ -893,22 +895,46 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
 
     doc.fontSize(20).text('Ordem de Serviço (OS)', { align: 'center' });
     doc.moveDown();
-    doc.fontSize(12).text(`ID da OS: ${ordem.id}`);
+
+    doc.fontSize(12);
+    doc.text(`ID da OS: ${ordem.id}`);
     doc.text(`Solicitante: ${ordem.solicitante}`);
+    doc.text(`Equipamento: ${ordem.equipamento_nome} (${ordem.equipamento_codigo})`);
     doc.text(`Tipo: ${ordem.tipo}`);
-    doc.text(`Equipamento: ${ordem.equipamento_nome || '-'} (${ordem.equipamento_codigo || '-'})`);
     doc.moveDown();
+
     doc.text('Descrição:');
-    doc.fontSize(11).text(ordem.descricao || '-', { indent: 10 });
+    doc.fontSize(11).text(ordem.descricao, { indent: 10 });
     doc.moveDown();
+
     doc.fontSize(12).text(`Status: ${ordem.status}`);
     if (ordem.status === 'fechada') {
       doc.text(`Fechada em: ${ordem.fechada_em}`);
-      doc.text(`Resultado: ${ordem.resultado || '-'}`);
+      doc.text(`Resultado: ${ordem.resultado}`);
     }
-    doc.moveDown(2);
-    doc.text('Assinatura: ____________________________');
+
+    // FOTOS DA OS
+    if (fotos.length > 0) {
+      doc.addPage();
+      doc.fontSize(16).text("Fotos da OS", { align: "center" });
+      doc.moveDown();
+
+      for (const foto of fotos) {
+        try {
+          doc.fontSize(12).text(foto.tipo === 'abertura' ? 'Abertura' : 'Fechamento', { align: 'left' });
+          doc.image(path.join(__dirname, 'public', foto.caminho), {
+            fit: [420, 420],
+            align: 'center'
+          });
+          doc.moveDown(1.5);
+        } catch (err) {
+          console.log("Erro ao carregar imagem no PDF:", err);
+        }
+      }
+    }
+
     doc.end();
+
   } catch (err) {
     console.error(err);
     res.send('Erro ao gerar PDF.');

@@ -927,13 +927,18 @@ app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
 // ---------------------------------------------
 // DASHBOARD
 // ---------------------------------------------
+// ---------------------------------------------
+// DASHBOARD
+// ---------------------------------------------
 app.get('/', authRequired, async (req, res) => {
   try {
 
+    // Totais
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
 
+    // Últimas OS
     const ultimas = await allAsync(`
       SELECT o.*, e.nome AS equipamento_nome
       FROM ordens o
@@ -942,7 +947,7 @@ app.get('/', authRequired, async (req, res) => {
       LIMIT 6
     `);
 
-    // 👇 ADICIONADO — sem isso o dashboard explode
+    // Gráfico por tipo de correia
     const tipos = await allAsync(`
       SELECT modelo AS tipo, COUNT(*) AS total
       FROM correias
@@ -950,24 +955,37 @@ app.get('/', authRequired, async (req, res) => {
       ORDER BY modelo
     `);
 
+    // Gráfico por dia
+    const porDia = await allAsync(`
+      SELECT DATE(aberta_em) AS dia, COUNT(*) AS total
+      FROM ordens
+      GROUP BY DATE(aberta_em)
+      ORDER BY dia ASC
+    `);
+
+    // Gráfico por mês
+    const porMes = await allAsync(`
+      SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
+      FROM ordens
+      GROUP BY strftime('%Y-%m', aberta_em)
+      ORDER BY mes ASC
+    `);
+
     res.render("admin/dashboard", {
       totais: {
         equipamentos: totalEquip.c,
         abertas: totalAbertas.c,
-        fechadas: totalFechadas.c
-        porDia,
-    porMes,
+        fechadas: totalFechadas.c,
       },
       ultimas,
-      tipos,  // <-- essencial
-      active: "dashboard",
+      tipos,
+      porDia,
+      porMes,
+      active: "dashboard"
     });
 
   } catch (err) {
     console.error(err);
     res.send("Erro ao carregar dashboard.");
   }
-});
-app.listen(PORT, () => {
-    console.log("Servidor ativo na porta " + PORT);
 });

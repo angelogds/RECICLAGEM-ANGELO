@@ -1,89 +1,44 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Sistema Manutenção' %></title>
+    <title><%= title || "Campo do Gado" %></title>
 
     <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
 
-    <!-- BOTÃO MENU MOBILE -->
-    <span class="menu-toggle" onclick="toggleMenu()">
-        <i class="fa-solid fa-bars"></i>
-    </span>
+    <!-- sidebar -->
+    <aside class="sidebar">
+        <h2 class="logo">Campo do Gado</h2>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-
-        <h2>Campo do Gado</h2>
-
-        <ul>
-            <li>
-                <a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">
-                    <i class="fa-solid fa-chart-line"></i> Dashboard
-                </a>
-            </li>
+        <ul class="menu">
+            <li><a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
 
             <% if (session.role === 'admin' || session.role === 'funcionario') { %>
-                <li>
-                    <a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>">
-                        <i class="fa-solid fa-truck"></i> Equipamentos
-                    </a>
-                </li>
-
-                <li>
-                    <a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>">
-                        <i class="fa-solid fa-gears"></i> Correias / Estoque
-                    </a>
-                </li>
+                <li><a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>"><i class="fa-solid fa-truck"></i> Equipamentos</a></li>
+                <li><a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>"><i class="fa-solid fa-gear"></i> Correias / Estoque</a></li>
             <% } %>
 
-            <li>
-                <a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>">
-                    <i class="fa-solid fa-list-check"></i> Ordens de Serviço
-                </a>
-            </li>
+            <li><a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>"><i class="fa-solid fa-list-check"></i> Ordens</a></li>
 
             <% if (session.role === 'admin') { %>
-                <li>
-                    <a href="/users" class="<%= active === 'users' ? 'active' : '' %>">
-                        <i class="fa-solid fa-users"></i> Usuários
-                    </a>
-                </li>
+                <li><a href="/users" class="<%= active === 'users' ? 'active' : '' %>"><i class="fa-solid fa-users"></i> Usuários</a></li>
             <% } %>
 
-            <li>
-                <a href="/logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </a>
-            </li>
+            <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
         </ul>
+
+        <p class="login-info">Logado como: <%= session.usuario %></p>
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div class="main-container">
-
-        <header>
-            <div class="user-info">
-                Logado como: <strong><%= session.usuario %></strong>
-            </div>
-        </header>
-
-        <main>
-            <%- body %>
-        </main>
-
-    </div>
-
-<script>
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-    }
-</script>
+    <!-- conteúdo -->
+    <main class="content">
+        <%- body %>
+    </main>
 
 </body>
 </html>

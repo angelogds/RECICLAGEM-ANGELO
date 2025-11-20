@@ -1,7 +1,5 @@
-// server.js — Sistema de Manutenção completo (roles, correias, QR, uploads, seed)
+// server.js — Sistema de Manutenção completo
 // Requer: express, express-ejs-layouts, express-session, ejs, sqlite3, multer, pdfkit, bcrypt, nodemailer, uuid, qrcode
-// =======================
-
 
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
@@ -32,15 +30,13 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'segredo-super-forte-123',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000
-  }
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// expose session to views
+// expose session + default error to views (avoid undefined in layout)
 app.use((req, res, next) => {
   res.locals.session = req.session;
+  res.locals.error = null;
   next();
 });
 
@@ -138,6 +134,18 @@ db.serialize(() => {
       fechada_em DATETIME,
       resultado TEXT,
       FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id)
+    );
+  `);
+
+  // Fotos da OS
+  db.run(`
+    CREATE TABLE IF NOT EXISTS os_fotos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      os_id INTEGER,
+      caminho TEXT,
+      tipo TEXT,          -- 'abertura' ou 'fechamento'
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (os_id) REFERENCES ordens(id)
     );
   `);
 
@@ -245,7 +253,9 @@ function allowRoles(...roles) {
 
 // ========== ROUTES ==========
 
-// ---------- public/open routes (login / forgot / reset) ----------
+// ---------- public/open routes (login / forgot / reset / inicio) ----------
+app.get('/inicio', (req, res) => res.render('inicio', { layout: false }));
+
 app.get('/login', (req, res) => {
   res.render('login', { layout: false, error: null });
 });
@@ -302,7 +312,6 @@ app.post('/forgot', async (req, res) => {
 
     console.log('Link de recuperação:', resetUrl);
     return res.render('forgot', { layout: false, error: null, info: 'Link gerado (verifique o console do servidor).' });
-
   } catch (err) {
     console.error(err);
     return res.render('forgot', { layout: false, error: 'Erro interno.', info: null });
@@ -617,27 +626,19 @@ app.post('/equipamentos/:id/baixar-correia', authRequired, allowRoles('admin', '
     res.send('Erro ao debitar correia.');
   }
 });
+
 // ====================================================================
 // MENU DO EQUIPAMENTO (USADO PELO QR CODE)
 // ====================================================================
 app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
-    try {
-        const equipamento = await getAsync(
-            `SELECT * FROM equipamentos WHERE id = ?`,
-            [req.params.id]
-        );
-
-        if (!equipamento) return res.send("Equipamento não encontrado.");
-
-        res.render('equipamento_menu', {
-            equipamento,
-            active: 'equipamentos'
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.send("Erro ao carregar menu do equipamento.");
-    }
+  try {
+    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
+    if (!equipamento) return res.send("Equipamento não encontrado.");
+    res.render('equipamento_menu', { equipamento, active: 'equipamentos' });
+  } catch (err) {
+    console.error(err);
+    res.send("Erro ao carregar menu do equipamento.");
+  }
 });
 
 // Relatório mensal de consumo de correias
@@ -659,45 +660,34 @@ app.get('/correias/relatorio', authRequired, allowRoles('admin', 'funcionario'),
     res.send('Erro ao gerar relatório.');
   }
 });
+
 // ==============================================
 // HISTÓRICO COMPLETO DO EQUIPAMENTO
 // ==============================================
 app.get('/equipamentos/:id/historico', authRequired, async (req, res) => {
   try {
     const id = req.params.id;
-
-    const equipamento = await getAsync(
-      `SELECT * FROM equipamentos WHERE id = ?`,
-      [id]
-    );
+    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [id]);
     if (!equipamento) return res.send("Equipamento não encontrado.");
 
     // Histórico de OS
-    const ordens = await allAsync(
-      `SELECT id, tipo, status, aberta_em, fechada_em
-       FROM ordens
-       WHERE equipamento_id = ?
-       ORDER BY aberta_em DESC`,
-      [id]
-    );
+    const ordens = await allAsync(`
+      SELECT id, tipo, status, aberta_em, fechada_em
+      FROM ordens
+      WHERE equipamento_id = ?
+      ORDER BY aberta_em DESC
+    `, [id]);
 
     // Histórico de correias consumidas
-    const correias = await allAsync(
-      `SELECT c.nome AS correia, cc.quantidade, cc.data
-       FROM consumo_correias cc
-       LEFT JOIN correias c ON c.id = cc.correia_id
-       WHERE cc.equipamento_id = ?
-       ORDER BY cc.data DESC`,
-      [id]
-    );
+    const correias = await allAsync(`
+      SELECT c.nome AS correia, cc.quantidade, cc.data
+      FROM consumo_correias cc
+      LEFT JOIN correias c ON c.id = cc.correia_id
+      WHERE cc.equipamento_id = ?
+      ORDER BY cc.data DESC
+    `, [id]);
 
-    res.render('equipamento_historico', {
-      equipamento,
-      ordens,
-      correias,
-      active: 'equipamentos'
-    });
-
+    res.render('equipamento_historico', { equipamento, ordens, correias, active: 'equipamentos' });
   } catch (err) {
     console.error(err);
     res.send("Erro ao carregar histórico.");
@@ -719,9 +709,7 @@ app.use('/ordens', authRequired, allowRoles('admin', 'funcionario', 'operador'))
 app.get('/ordens', async (req, res) => {
   try {
     let ordens;
-
     if (req.session.role === 'operador') {
-      // Apenas OS do próprio operador
       ordens = await allAsync(`
         SELECT o.*, e.nome AS equipamento_nome
         FROM ordens o
@@ -730,7 +718,6 @@ app.get('/ordens', async (req, res) => {
         ORDER BY o.aberta_em DESC
       `, [req.session.usuario]);
     } else {
-      // Admin e funcionário veem tudo
       ordens = await allAsync(`
         SELECT o.*, e.nome AS equipamento_nome
         FROM ordens o
@@ -738,9 +725,7 @@ app.get('/ordens', async (req, res) => {
         ORDER BY o.aberta_em DESC
       `);
     }
-
     res.render('ordens', { ordens, active: 'ordens' });
-
   } catch (err) {
     console.error(err);
     res.send('Erro ao listar ordens.');
@@ -748,16 +733,12 @@ app.get('/ordens', async (req, res) => {
 });
 
 // ---------------------------------------------
-// FORM — ABRIR OS
+// FORM — ABRIR OS (com fotos possível)
 // ---------------------------------------------
 app.get('/ordens/novo', async (req, res) => {
   try {
-    const equipamentos = await allAsync(`
-      SELECT id, nome FROM equipamentos ORDER BY nome ASC
-    `);
-
+    const equipamentos = await allAsync(`SELECT id, nome FROM equipamentos ORDER BY nome ASC`);
     res.render('abrir_os', { equipamentos, active: 'abrir_os' });
-
   } catch (err) {
     console.error(err);
     res.send('Erro ao abrir formulário de OS.');
@@ -765,20 +746,31 @@ app.get('/ordens/novo', async (req, res) => {
 });
 
 // ---------------------------------------------
-// CRIAR OS (solicitante sempre = usuário logado)
+// CRIAR OS (com upload de fotos de abertura)
 // ---------------------------------------------
-app.post('/ordens', async (req, res) => {
+app.post('/ordens', upload.array('fotos', 10), async (req, res) => {
   try {
     const { equipamento_id, tipo, descricao } = req.body;
     const solicitante = req.session.usuario;
 
-    await runAsync(`
+    // Criar OS
+    const result = await runAsync(`
       INSERT INTO ordens (equipamento_id, solicitante, tipo, descricao, status)
       VALUES (?, ?, ?, ?, 'aberta')
     `, [equipamento_id || null, solicitante, tipo, descricao]);
 
-    res.redirect('/ordens');
+    const osId = result.lastID;
 
+    // Salvar fotos (abertura)
+    if (req.files && req.files.length > 0) {
+      for (const foto of req.files) {
+        await runAsync(`
+          INSERT INTO os_fotos (os_id, caminho, tipo) VALUES (?, ?, 'abertura')
+        `, [osId, path.join('uploads', foto.filename)]);
+      }
+    }
+
+    res.redirect('/ordens');
   } catch (err) {
     console.error(err);
     res.send('Erro ao criar OS.');
@@ -786,7 +778,7 @@ app.post('/ordens', async (req, res) => {
 });
 
 // ---------------------------------------------
-// VER OS
+// VER OS (com fotos)
 // ---------------------------------------------
 app.get('/ordens/:id', async (req, res) => {
   try {
@@ -804,8 +796,10 @@ app.get('/ordens/:id', async (req, res) => {
       return res.status(403).send('Acesso negado.');
     }
 
-    res.render('ordens_fechar', { ordem, active: 'ordens' });
+    // buscar fotos
+    const fotos = await allAsync(`SELECT * FROM os_fotos WHERE os_id = ? ORDER BY created_at ASC`, [req.params.id]);
 
+    res.render('ordens_fechar', { ordem, fotos, active: 'ordens' });
   } catch (err) {
     console.error(err);
     res.send('Erro ao carregar OS.');
@@ -813,14 +807,12 @@ app.get('/ordens/:id', async (req, res) => {
 });
 
 // ---------------------------------------------
-// FECHAR OS
+// FECHAR OS (com upload de fotos de fechamento)
 // ---------------------------------------------
-app.post('/ordens/:id/fechar', async (req, res) => {
+app.post('/ordens/:id/fechar', upload.array('fotos', 10), async (req, res) => {
   try {
-    const ordem = await getAsync(`
-      SELECT solicitante FROM ordens WHERE id = ?
-    `, [req.params.id]);
-
+    const osId = req.params.id;
+    const ordem = await getAsync(`SELECT solicitante FROM ordens WHERE id = ?`, [osId]);
     if (!ordem) return res.send('Ordem não encontrada.');
 
     // Operador só pode fechar as próprias OS
@@ -830,14 +822,20 @@ app.post('/ordens/:id/fechar', async (req, res) => {
 
     await runAsync(`
       UPDATE ordens
-      SET status='fechada',
-          resultado=?,
-          fechada_em=CURRENT_TIMESTAMP
-      WHERE id=?
-    `, [req.body.resultado, req.params.id]);
+      SET status='fechada', resultado=?, fechada_em=CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [req.body.resultado, osId]);
+
+    // Salvar fotos de fechamento
+    if (req.files && req.files.length > 0) {
+      for (const foto of req.files) {
+        await runAsync(`
+          INSERT INTO os_fotos (os_id, caminho, tipo) VALUES (?, ?, 'fechamento')
+        `, [osId, path.join('uploads', foto.filename)]);
+      }
+    }
 
     res.redirect('/ordens');
-
   } catch (err) {
     console.error(err);
     res.send('Erro ao fechar OS.');
@@ -864,75 +862,42 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
     }
 
     const doc = new PDFDocument({ margin: 40 });
-
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=OS_${ordem.id}.pdf`
-    );
+    res.setHeader('Content-Disposition', `attachment; filename=OS_${ordem.id}.pdf`);
     res.setHeader('Content-Type', 'application/pdf');
-
     doc.pipe(res);
 
     doc.fontSize(20).text('Ordem de Serviço (OS)', { align: 'center' });
     doc.moveDown();
-
     doc.fontSize(12).text(`ID da OS: ${ordem.id}`);
     doc.text(`Solicitante: ${ordem.solicitante}`);
     doc.text(`Tipo: ${ordem.tipo}`);
-    doc.text(`Equipamento: ${ordem.equipamento_nome} (${ordem.equipamento_codigo})`);
+    doc.text(`Equipamento: ${ordem.equipamento_nome || '-'} (${ordem.equipamento_codigo || '-'})`);
     doc.moveDown();
-
     doc.text('Descrição:');
-    doc.fontSize(11).text(ordem.descricao, { indent: 10 });
+    doc.fontSize(11).text(ordem.descricao || '-', { indent: 10 });
     doc.moveDown();
-
     doc.fontSize(12).text(`Status: ${ordem.status}`);
     if (ordem.status === 'fechada') {
       doc.text(`Fechada em: ${ordem.fechada_em}`);
-      doc.text(`Resultado: ${ordem.resultado}`);
+      doc.text(`Resultado: ${ordem.resultado || '-'}`);
     }
-
     doc.moveDown(2);
     doc.text('Assinatura: ____________________________');
     doc.end();
-
   } catch (err) {
     console.error(err);
     res.send('Erro ao gerar PDF.');
   }
 });
-// ---------------------------------------------
-// QR CODE DO EQUIPAMENTO (MENU MOBILE)
-// ---------------------------------------------
-app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
-  try {
-    const equipamento = await getAsync(`
-      SELECT * FROM equipamentos WHERE id = ?
-    `, [req.params.id]);
 
-    if (!equipamento) return res.send("Equipamento não encontrado.");
-
-    res.render("equipamento_menu", {
-      equipamento,
-      active: "equipamentos",
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.send("Erro ao abrir menu do equipamento.");
-  }
-});
-
-// ---------------------------------------------
-// DASHBOARD
-// ---------------------------------------------
+// ---------------------- DASHBOARD ----------------------
 app.get('/', authRequired, async (req, res) => {
   try {
-
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
 
+    // Últimas ordens
     const ultimas = await allAsync(`
       SELECT o.*, e.nome AS equipamento_nome
       FROM ordens o
@@ -941,37 +906,41 @@ app.get('/', authRequired, async (req, res) => {
       LIMIT 6
     `);
 
-    // Gráfico por tipo
+    // TIPOS: aqui usei ordens.tipo para gráfico de tipos de OS (se preferir outro campo ajuste)
     const tipos = await allAsync(`
-      SELECT modelo AS tipo, COUNT(*) AS total
-      FROM correias
-      GROUP BY modelo
-      ORDER BY modelo
+      SELECT tipo, COUNT(*) AS total
+      FROM ordens
+      GROUP BY tipo
     `);
 
-    // Gráfico por mês (corrigido!)
+    // POR MÊS (YYYY-MM)
     const porMes = await allAsync(`
-      SELECT strftime('%Y-%m', aberta_em) AS mes,
-             COUNT(*) AS total
+      SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
       FROM ordens
       GROUP BY mes
       ORDER BY mes ASC
     `);
 
-    res.render("admin/dashboard", {
+    res.render('admin/dashboard', {
+      active: 'dashboard',
       totais: {
-        equipamentos: totalEquip.c,
-        abertas: totalAbertas.c,
-        fechadas: totalFechadas.c,
+        equipamentos: totalEquip?.c || 0,
+        abertas: totalAbertas?.c || 0,
+        fechadas: totalFechadas?.c || 0
       },
-      ultimas,
       tipos,
-      porMes,   // <<---- ESSENCIAL!!
-      active: "dashboard",
+      porMes,
+      ultimas
     });
 
   } catch (err) {
     console.error(err);
-    res.send("Erro ao carregar dashboard.");
+    res.send('Erro ao carregar dashboard.');
   }
+});
+
+// ---------------------- START ----------------------
+app.listen(PORT, () => {
+  console.log(`Servidor ativo na porta ${PORT}`);
+  console.log(`SQLite conectado em ${DB_FILE}`);
 });

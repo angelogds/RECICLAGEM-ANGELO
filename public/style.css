@@ -345,3 +345,17 @@ canvas {
     max-height: 92%;
     border-radius: 10px;
 }
+.btn-delete-foto {
+    background: #c62828;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-delete-foto:hover {
+    background: #b71c1c;
+}

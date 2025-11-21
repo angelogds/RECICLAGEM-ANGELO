@@ -1,42 +1,67 @@
 <h1 class="page-title">Equipamentos</h1>
 
-<a href="/equipamentos/novo" class="btn-add">+ Novo Equipamento</a>
+<div class="top-actions">
+    <a href="/equipamentos/novo" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Novo Equipamento
+    </a>
+</div>
 
-<table class="tabela">
-    <tr>
-        <th>ID</th>
-        <th>Imagem</th>
-        <th>Nome</th>
-        <th>Código</th>
-        <th>Local</th>
-        <th>Ações</th>
-    </tr>
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Imagem</th>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Local</th>
+                <th style="text-align:center;">Ações</th>
+            </tr>
+        </thead>
 
-    <% equipamentos.forEach(e => { %>
-        <tr>
-            <td><%= e.id %></td>
+        <tbody>
+            <% if (equipamentos.length === 0) { %>
+                <tr>
+                    <td colspan="6" class="empty">Nenhum equipamento cadastrado.</td>
+                </tr>
+            <% } %>
 
-            <td>
-                <% if (e.imagem) { %>
-                    <img src="/<%= e.imagem %>" class="thumb">
-                <% } else { %>
-                    <span class="sem-img">Sem imagem</span>
-                <% } %>
-            </td>
+            <% equipamentos.forEach(e => { %>
+                <tr>
+                    <td><%= e.id %></td>
+                    <td>
+                        <% if (e.imagem) { %>
+                            <img src="/<%= e.imagem %>" class="thumb">
+                        <% } else { %>
+                            <span class="no-image">Sem imagem</span>
+                        <% } %>
+                    </td>
+                    <td><%= e.nome %></td>
+                    <td><%= e.codigo %></td>
+                    <td><%= e.local %></td>
+                    <td class="actions">
 
-            <td><%= e.nome %></td>
-            <td><%= e.codigo || "-" %></td>
-            <td><%= e.local || "-" %></td>
+                        <a href="/equipamentos/<%= e.id %>/editar" class="btn-edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
 
-            <td>
-                <a href="/equipamentos/<%= e.id %>/editar" class="btn-edit">Editar</a>
-                <a href="/equipamentos/<%= e.id %>/qrcode" class="btn-qr"><i class="fa-solid fa-qrcode"></i></a>
+                        <a href="/equipamentos/<%= e.id %>/qrcode" class="btn-qr">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </a>
 
-                <form method="POST" action="/equipamentos/<%= e.id %>/delete"
-                      style="display:inline;" onsubmit="return confirm('Excluir este equipamento?')">
-                    <button class="btn-del">Excluir</button>
-                </form>
-            </td>
-        </tr>
-    <% }) %>
-</table>
+                        <a href="/equipamentos/<%= e.id %>/historico" class="btn-history">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </a>
+
+                        <form method="POST" action="/equipamentos/<%= e.id %>/delete" onsubmit="return confirm('Remover equipamento?');">
+                            <button class="btn-delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>

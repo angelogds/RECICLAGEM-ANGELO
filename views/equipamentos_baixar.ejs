@@ -1,40 +1,92 @@
+<% layout('layout', { title: "Baixa de Correias", active: "equipamentos" }) %>
+
 <h1 class="page-title">
-    Baixar Correia — <%= equipamento.nome %>
+    <i class="fa-solid fa-arrow-down"></i> Baixar Correias — <%= equipamento.nome %>
 </h1>
 
 <div class="card">
 
-    <p><strong>Equipamento:</strong> <%= equipamento.nome %></p>
-    <p><strong>Código:</strong> <%= equipamento.codigo || "-" %></p>
-    <p><strong>Local:</strong> <%= equipamento.local || "-" %></p>
+    <div class="equip-info">
+        <p><strong>ID:</strong> <%= equipamento.id %></p>
+        <p><strong>Código:</strong> <%= equipamento.codigo %></p>
+        <p><strong>Local:</strong> <%= equipamento.local %></p>
 
-    <hr style="margin:20px 0;">
+        <% if (equipamento.imagem) { %>
+            <img src="/<%= equipamento.imagem %>" class="equip-preview">
+        <% } %>
+    </div>
 
-    <h3>Selecionar Correia para Baixa</h3>
-
-    <form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar-correia" class="form-card">
-
-        <label>Correia</label>
-        <select name="correia_id" required>
-            <option value="">Selecione...</option>
-            <% correias.forEach(c => { %>
-                <option value="<%= c.id %>">
-                    <%= c.nome %> — <%= c.modelo || '-' %> | Estoque: <%= c.quantidade %>
-                </option>
-            <% }) %>
-        </select>
-
-        <label>Quantidade a debitar</label>
-        <input type="number" name="quantidade" min="1" placeholder="0" required>
-
-        <button class="btn-primary" style="margin-top:20px;">
-            <i class="fa-solid fa-minus"></i> Baixar do Estoque
-        </button>
-
-    </form>
 </div>
 
-<a href="/equipamentos/<%= equipamento.id %>" class="btn-secondary" style="margin-top:20px;">
-    <i class="fa-solid fa-arrow-left"></i> Voltar
-</a>
+<hr>
 
+<h2 class="section-title">
+    <i class="fa-solid fa-gears"></i> Registrar Baixa de Correia
+</h2>
+
+<form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar" class="form-card">
+
+    <% if (error) { %>
+        <div class="alert-error"><%= error %></div>
+    <% } %>
+
+    <div class="form-grid">
+
+        <div>
+            <label>Correia</label>
+            <select name="correia_id" required>
+                <option value="">Selecione...</option>
+                <% correias.forEach(c => { %>
+                    <option value="<%= c.id %>"><%= c.nome %> — <%= c.modelo %> (<%= c.quantidade %> em estoque)</option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div>
+            <label>Quantidade</label>
+            <input type="number" name="quantidade" min="1" required>
+        </div>
+
+    </div>
+
+    <button class="btn-primary" style="margin-top:20px;">
+        <i class="fa-solid fa-save"></i> Registrar Baixa
+    </button>
+
+</form>
+
+<hr>
+
+<h2 class="section-title">
+    <i class="fa-solid fa-list"></i> Histórico de Baixas
+</h2>
+
+<div class="card table-card">
+
+    <table class="table-modern">
+        <thead>
+            <tr>
+                <th>Correia</th>
+                <th>Quantidade</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (historico.length === 0) { %>
+                <tr>
+                    <td colspan="3" class="empty">Nenhuma baixa registrada ainda.</td>
+                </tr>
+            <% } %>
+
+            <% historico.forEach(h => { %>
+                <tr>
+                    <td><%= h.correia %></td>
+                    <td><span class="tag red"><%= h.quantidade %></span></td>
+                    <td><%= h.data %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+</div>

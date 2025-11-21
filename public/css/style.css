@@ -360,3 +360,48 @@ body { background:#eef2f3; color:#12321a; }
 .center {
     text-align: center;
 }
+.form-card {
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+.form-grid {
+    display: grid;
+    gap: 18px;
+}
+
+@media (min-width: 750px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+label {
+    font-weight: 600;
+    color: #0f431f;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: #f7fff9;
+    border: 1px solid #cfe9d7;
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: #1b7f42;
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.btn-primary:hover {
+    background: #145e30;
+}

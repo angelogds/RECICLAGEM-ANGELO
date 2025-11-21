@@ -2,22 +2,39 @@
     <%= correia ? "Editar Correia" : "Cadastrar Nova Correia" %>
 </h1>
 
-<form method="POST" 
-      action="<%= correia ? '/correias/' + correia.id + '/editar' : '/correias/novo' %>" 
-      class="form-card">
+<div class="card form-card">
 
-    <label>Nome da Correia</label>
-    <input name="nome" required value="<%= correia?.nome || "" %>">
+    <form method="POST"
+          action="<%= correia ? '/correias/' + correia.id + '/editar' : '/correias/novo' %>">
 
-    <label>Modelo</label>
-    <input name="modelo" value="<%= correia?.modelo || "" %>">
+        <div class="form-group">
+            <label>Nome da Correia</label>
+            <input class="input" name="nome" required
+                   value="<%= correia?.nome || "" %>">
+        </div>
 
-    <label>Medida</label>
-    <input name="medida" value="<%= correia?.medida || "" %>">
+        <div class="form-group">
+            <label>Modelo</label>
+            <input class="input" name="modelo"
+                   value="<%= correia?.modelo || "" %>">
+        </div>
 
-    <label>Quantidade em estoque</label>
-    <input type="number" name="quantidade" min="0" 
-           value="<%= correia?.quantidade || 0 %>">
+        <div class="form-group">
+            <label>Medida</label>
+            <input class="input" name="medida"
+                   value="<%= correia?.medida || "" %>">
+        </div>
 
-    <button class="btn-save"><%= correia ? "Salvar Alterações" : "Cadastrar" %></button>
-</form>
+        <div class="form-group">
+            <label>Quantidade em estoque</label>
+            <input class="input" type="number" min="0" name="quantidade"
+                   value="<%= correia?.quantidade || 0 %>">
+        </div>
+
+        <button class="btn-primary btn-full">
+            <%= correia ? "Salvar Alterações" : "Cadastrar" %>
+        </button>
+
+    </form>
+
+</div>

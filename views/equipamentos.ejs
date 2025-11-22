@@ -1,28 +1,28 @@
 <td class="center">
     <div class="acoes-col">
 
-        <!-- EDITAR (🟢) -->
+        <!-- EDITAR -->
         <a href="/equipamentos/<%= e.id %>/editar" class="btn-sm btn-edit" title="Editar">
             🟢
         </a>
 
-        <!-- QR CODE (🔵) -->
+        <!-- QR CODE -->
         <a href="/equipamentos/<%= e.id %>/qrcode" class="btn-sm btn-qrcode" title="QR Code">
             🔵
         </a>
 
-        <!-- HISTÓRICO (🟡) -->
+        <!-- HISTÓRICO -->
         <a href="/equipamentos/<%= e.id %>/historico" class="btn-sm btn-history" title="Histórico">
             🟡
         </a>
 
-        <!-- CORREIAS (🟡) -->
+        <!-- CORREIAS -->
         <a href="/equipamentos/<%= e.id %>/correias" class="btn-sm btn-correia" title="Correias">
             🟡
         </a>
 
-        <!-- EXCLUIR (🔴) -->
-        <form method="POST" action="/equipamentos/<%= e.id %>/delete" onsubmit="return confirm('Remover equipamento?');">
+        <!-- EXCLUIR -->
+        <form method="POST" action="/equipamentos/<%= e.id %>/delete" style="display:inline;" onsubmit="return confirm('Remover equipamento?');">
             <button class="btn-sm btn-delete" title="Excluir">
                 🔴
             </button>

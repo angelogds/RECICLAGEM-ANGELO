@@ -1,43 +1,18 @@
-<h1 class="page-title">
-    <i class="fa-solid fa-qrcode"></i> QR Code — <%= equipamento.nome %>
-</h1>
+<td class="center">
+    <div class="acoes-col">
 
-<div class="card qr-card">
+        <a href="/equipamentos/<%= e.id %>/editar" class="btn-sm btn-edit" title="Editar">🟢</a>
 
-    <div class="equip-info">
-        <p><strong>Equipamento:</strong> <%= equipamento.nome %></p>
-        <p><strong>Código:</strong> <%= equipamento.codigo || "-" %></p>
-        <p><strong>Local:</strong> <%= equipamento.local || "-" %></p>
+        <a href="/equipamentos/<%= e.id %>/qrcode" class="btn-sm btn-qrcode" title="QR Code">🔵</a>
+
+        <a href="/equipamentos/<%= e.id %>/historico" class="btn-sm btn-history" title="Histórico">🟡</a>
+
+        <a href="/equipamentos/<%= e.id %>/correias" class="btn-sm btn-correia" title="Correias">🟡</a>
+
+        <form method="POST" action="/equipamentos/<%= e.id %>/delete"
+              style="display:inline;" onsubmit="return confirm('Remover equipamento?');">
+            <button class="btn-sm btn-delete" title="Excluir">🔴</button>
+        </form>
+
     </div>
-
-    <div class="qr-wrapper">
-        <img src="<%= qr %>" class="qr-img">
-        <p class="qr-url"><%= url %></p>
-    </div>
-
-</div>
-
-<div class="top-actions">
-    <a href="/equipamentos/<%= equipamento.id %>/menu" class="btn-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
-    </a>
-</div>
-
-<style>
-.qr-card {
-    text-align: center;
-    padding: 25px;
-}
-.qr-img {
-    width: 260px;
-    height: 260px;
-}
-.qr-url {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #0d2a16;
-}
-.equip-info p {
-    margin: 3px 0;
-}
-</style>
+</td>

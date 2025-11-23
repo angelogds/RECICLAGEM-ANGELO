@@ -1,57 +1,70 @@
 <h1 class="page-title">
+    <i class="fa-solid fa-truck"></i>
     <%= equipamento ? "Editar Equipamento" : "Novo Equipamento" %>
 </h1>
 
-<div class="card form-card">
-
+<div class="card" style="
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+    max-width:650px;
+">
     <form method="POST"
           action="<%= equipamento ? '/equipamentos/' + equipamento.id : '/equipamentos' %>"
           enctype="multipart/form-data">
 
         <!-- Nome -->
-        <label>Nome do Equipamento</label>
+        <label style="font-weight:600;">Nome do Equipamento</label>
         <input type="text" name="nome" required
-               value="<%= equipamento ? equipamento.nome : '' %>">
+               value="<%= equipamento ? equipamento.nome : '' %>"
+               style="width:100%; padding:12px; border:1px solid #d9d9d9; border-radius:8px; margin-bottom:18px;">
 
         <!-- Código -->
-        <label>Código / Tag</label>
+        <label style="font-weight:600;">Código / Tag</label>
         <input type="text" name="codigo"
-               value="<%= equipamento ? equipamento.codigo : '' %>">
+               value="<%= equipamento ? equipamento.codigo : '' %>"
+               style="width:100%; padding:12px; border:1px solid #d9d9d9; border-radius:8px; margin-bottom:18px;">
 
         <!-- Local -->
-        <label>Local</label>
+        <label style="font-weight:600;">Local</label>
         <input type="text" name="local"
-               value="<%= equipamento ? equipamento.local : '' %>">
+               value="<%= equipamento ? equipamento.local : '' %>"
+               style="width:100%; padding:12px; border:1px solid #d9d9d9; border-radius:8px; margin-bottom:18px;">
 
         <!-- Descrição -->
-        <label>Descrição</label>
-        <textarea name="descricao" rows="4"><%= equipamento ? equipamento.descricao : '' %></textarea>
+        <label style="font-weight:600;">Descrição</label>
+        <textarea name="descricao" rows="4"
+                  style="width:100%; padding:12px; border:1px solid #d9d9d9; border-radius:8px; margin-bottom:18px;"><%= equipamento ? equipamento.descricao : '' %></textarea>
 
         <!-- Imagem -->
-        <label>Imagem do Equipamento</label>
+        <label style="font-weight:600;">Imagem do Equipamento</label>
 
         <% if (equipamento && equipamento.imagem) { %>
-            <div class="img-preview">
-                <img src="/<%= equipamento.imagem %>" alt="Imagem atual">
-                <p class="img-info">Imagem atual — enviar nova para substituir</p>
+            <div style="margin-bottom:15px;">
+                <img src="/<%= equipamento.imagem %>" alt="Imagem atual"
+                     style="width:150px; height:150px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
+                <p style="font-size:13px; opacity:0.7; margin-top:5px;">
+                    Imagem atual — envie outra para substituir
+                </p>
             </div>
         <% } %>
 
-        <input type="file" name="imagem" accept="image/*">
+        <input type="file" name="imagem" accept="image/*"
+               style="margin-bottom:20px;">
 
         <!-- Botão Salvar -->
-        <button class="btn-primary" style="margin-top:20px;">
+        <button class="btn-primary" style="margin-top:10px;">
             <i class="fa-solid fa-save"></i>
             <%= equipamento ? "Salvar Alterações" : "Cadastrar Equipamento" %>
         </button>
 
     </form>
-
 </div>
 
 <!-- Botão voltar -->
-<div class="top-actions">
-    <a href="/equipamentos" class="btn-secondary">
+<div style="margin-top:20px;">
+    <a href="/equipamentos" class="btn-primary" style="background:#999;">
         <i class="fa-solid fa-arrow-left"></i> Voltar
     </a>
 </div>

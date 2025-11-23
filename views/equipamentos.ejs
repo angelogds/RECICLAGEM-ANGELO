@@ -1,12 +1,19 @@
-<h1 class="page-title">Equipamentos</h1>
+<h1 class="page-title">
+    <i class="fa-solid fa-truck"></i> Equipamentos
+</h1>
 
-<div class="top-actions">
+<div style="margin-bottom: 25px;">
     <a href="/equipamentos/novo" class="btn-primary">
         <i class="fa-solid fa-plus"></i> Novo Equipamento
     </a>
 </div>
 
-<div class="card">
+<div class="card" style="
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px #00000015;
+">
     <table class="table">
         <thead>
             <tr>
@@ -22,25 +29,29 @@
         <tbody>
             <% if (equipamentos.length === 0) { %>
                 <tr>
-                    <td colspan="6" class="empty">Nenhum equipamento cadastrado.</td>
+                    <td colspan="6" style="text-align:center; padding:18px; opacity:0.7;">
+                        Nenhum equipamento cadastrado.
+                    </td>
                 </tr>
             <% } %>
 
             <% equipamentos.forEach(e => { %>
                 <tr>
                     <td><%= e.id %></td>
+
                     <td>
                         <% if (e.imagem) { %>
                             <img src="/<%= e.imagem %>" class="thumb">
                         <% } else { %>
-                            <span class="no-image">Sem imagem</span>
+                            <span style="opacity:0.6;">Sem imagem</span>
                         <% } %>
                     </td>
+
                     <td><%= e.nome %></td>
                     <td><%= e.codigo %></td>
                     <td><%= e.local %></td>
-                    <td class="actions">
 
+                    <td class="actions">
                         <a href="/equipamentos/<%= e.id %>/editar" class="btn-edit">
                             <i class="fa-solid fa-pen"></i>
                         </a>
@@ -53,12 +64,12 @@
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </a>
 
-                        <form method="POST" action="/equipamentos/<%= e.id %>/delete" onsubmit="return confirm('Remover equipamento?');">
+                        <form method="POST" action="/equipamentos/<%= e.id %>/delete"
+                              onsubmit="return confirm('Remover equipamento?');">
                             <button class="btn-delete">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </form>
-
                     </td>
                 </tr>
             <% }) %>

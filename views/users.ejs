@@ -1,32 +1,70 @@
-<h1 class="page-title"><i class="fa-solid fa-users"></i> Usuários</h1>
+<h1 class="page-title">
+    <i class="fa-solid fa-users"></i> Usuários
+</h1>
 
-<div class="top-actions">
-  <a href="/users/new" class="btn-primary"><i class="fa-solid fa-plus"></i> Novo Usuário</a>
+<div style="margin-bottom:20px;">
+    <a href="/users/new" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Novo Usuário
+    </a>
 </div>
 
-<div class="card">
-  <table class="table-modern">
-    <thead><tr><th>ID</th><th>Usuário</th><th>Nome</th><th>Role</th><th style="text-align:center;">Ações</th></tr></thead>
-    <tbody>
-      <% if (users.length === 0) { %>
-        <tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>
-      <% } %>
+<div class="card" style="
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+">
 
-      <% users.forEach(u => { %>
-        <tr>
-          <td><%= u.id %></td>
-          <td><%= u.usuario %></td>
-          <td><%= u.nome %></td>
-          <td><%= u.role %></td>
-          <td class="acoes-col" style="justify-content:center;">
-            <a href="/users/<%= u.id %>/edit" class="btn-table-edit">Editar</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuário</th>
+                <th>Nome</th>
+                <th>Role</th>
+                <th style="text-align:center;">Ações</th>
+            </tr>
+        </thead>
 
-            <form method="POST" action="/users/<%= u.id %>/delete" onsubmit="return confirm('Excluir usuário?');" style="display:inline-block; margin-left:8px;">
-              <button class="btn-table-del">Excluir</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+        <tbody>
+
+            <% if (users.length === 0) { %>
+                <tr>
+                    <td colspan="5" style="text-align:center; opacity:0.6; padding:15px;">
+                        Nenhum usuário cadastrado.
+                    </td>
+                </tr>
+            <% } %>
+
+            <% users.forEach(u => { %>
+                <tr>
+                    <td><%= u.id %></td>
+                    <td><%= u.usuario %></td>
+                    <td><%= u.nome %></td>
+                    <td><%= u.role %></td>
+
+                    <td class="actions">
+
+                        <a href="/users/<%= u.id %>/edit"
+                           class="btn-edit"
+                           title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+
+                        <form method="POST"
+                              action="/users/<%= u.id %>/delete"
+                              onsubmit="return confirm('Excluir usuário?');"
+                              style="display:inline-block;">
+                            <button class="btn-delete" title="Excluir">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+            <% }) %>
+
+        </tbody>
+    </table>
+
 </div>

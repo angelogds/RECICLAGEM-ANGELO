@@ -1,27 +1,46 @@
-<h1 class="page-title">Cadastrar Novo Usuário</h1>
+<h1 class="page-title">
+    <i class="fa-solid fa-user-plus"></i> Novo Usuário
+</h1>
 
-<form method="POST" action="/users/new" class="form-card">
+<div class="card" style="
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+    max-width:600px;
+">
 
     <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
+        <div class="alert-error"><%= error %></div>
     <% } %>
 
-    <label>Usuário (login)</label>
-    <input type="text" name="usuario" required placeholder="ex: joao.silva">
+    <form method="POST" action="/users/new">
 
-    <label>Nome completo</label>
-    <input type="text" name="nome" required placeholder="Nome do usuário">
+        <!-- Login -->
+        <label style="font-weight:600;">Usuário (login / e-mail)</label>
+        <input type="text" name="usuario" required>
 
-    <label>Senha</label>
-    <input type="password" name="senha" required placeholder="Crie uma senha segura">
+        <!-- Senha -->
+        <label style="font-weight:600;">Senha</label>
+        <input type="password" name="senha" required>
 
-    <label>Papel do usuário</label>
-    <select name="role" required>
-        <option value="funcionario">Funcionário</option>
-        <option value="operador">Operador</option>
-        <option value="admin">Administrador</option>
-    </select>
+        <!-- Nome -->
+        <label style="font-weight:600;">Nome completo</label>
+        <input type="text" name="nome">
 
-    <button class="btn-save">Criar Usuário</button>
+        <!-- Papel -->
+        <label style="font-weight:600;">Papel</label>
+        <select name="role" required>
+            <option value="admin">Administrador</option>
+            <option value="funcionario" selected>Funcionário</option>
+            <option value="operador">Operador</option>
+        </select>
 
-</form>
+        <button class="btn-primary" style="margin-top:20px;">
+            <i class="fa-solid fa-save"></i> Salvar Usuário
+        </button>
+
+    </form>
+
+</div>
+

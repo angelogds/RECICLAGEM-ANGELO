@@ -1,21 +1,103 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- PREVENÇÃO DO ERRO -->
     <title><%= typeof title !== 'undefined' ? title : 'Campo do Gado' %></title>
 
     <link rel="stylesheet" href="/css/style.css" />
     <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
+
+    <style>
+        /* BOTÃO ARREDONDADO */
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 2000;
+            background: #0d542c;
+            border: none;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px #00000033;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .menu-toggle:hover {
+            box-shadow: 0 6px 16px #00000044;
+        }
+
+        .menu-toggle:active {
+            transform: scale(0.92);
+        }
+
+        .menu-logo-icon {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -270px;
+            width: 260px;
+            height: 100vh;
+            background: #0d542c;
+            padding: 25px 20px;
+            color: white;
+            z-index: 1500;
+            transition: left .35s ease;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        /* LOGO DO MENU */
+        .sidebar .logo {
+            width: 110px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* CONTEÚDO */
+        .main-content {
+            padding: 40px 35px;
+            margin-left: 0;
+            transition: margin-left .3s ease;
+        }
+
+        .main-content.menu-open {
+            margin-left: 260px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content.menu-open {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- BOTÃO HAMBÚRGUER -->
+    <!-- BOTÃO COM LOGO ARREDONDADO -->
     <button id="menuToggle" class="menu-toggle">
-        <i class="fa-solid fa-bars"></i>
+        <img src="/img/logo.png" class="menu-logo-icon">
     </button>
 
     <!-- SIDEBAR -->

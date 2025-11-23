@@ -1,45 +1,97 @@
-<h1 class="page-title">Ordem de Serviço #<%= ordem.id %></h1>
+<h1 class="page-title">
+    <i class="fa-solid fa-list-check"></i> Ordem de Serviço #<%= ordem.id %>
+</h1>
 
-<div class="card">
+<!-- CARD PRINCIPAL -->
+<div class="card" style="
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+    margin-bottom:25px;
+">
 
     <p><strong>Equipamento:</strong> <%= ordem.equipamento_nome || "-" %> (<%= ordem.equipamento_codigo || "-" %>)</p>
     <p><strong>Solicitante:</strong> <%= ordem.solicitante || "-" %></p>
     <p><strong>Tipo:</strong> <%= ordem.tipo || "-" %></p>
 
-    <p><strong>Status:</strong> 
+    <p><strong>Status:</strong>
         <% if (ordem.status === "aberta") { %>
-            <span class="tag aberta">Aberta</span>
+            <span style="
+                background:#d8f3dc;
+                color:#064e3b;
+                padding:6px 10px;
+                border-radius:6px;
+                font-weight:600;
+                font-size:13px;
+            ">Aberta</span>
         <% } else { %>
-            <span class="tag fechada">Fechada</span>
+            <span style="
+                background:#eee;
+                padding:6px 10px;
+                border-radius:6px;
+                font-weight:600;
+                font-size:13px;
+            ">Fechada</span>
         <% } %>
     </p>
 
     <p><strong>Data de Abertura:</strong> <%= ordem.aberta_em %></p>
 
-    <h3>Descrição da OS</h3>
-    <div class="descricao-box"><%= ordem.descricao %></div>
+    <h3 style="margin-top:20px; color:#083b1d;">Descrição da OS</h3>
+    <div style="
+        background:#f4f8f6;
+        padding:15px;
+        border-radius:10px;
+        margin-bottom:20px;
+        border:1px solid #e1ece5;
+    ">
+        <%= ordem.descricao %>
+    </div>
 
     <% if (ordem.status === "fechada") { %>
 
-        <h3>Resultado do Serviço</h3>
-        <div class="descricao-box"><%= ordem.resultado %></div>
+        <h3 style="color:#083b1d;">Resultado do Serviço</h3>
+        <div style="
+            background:#f4f8f6;
+            padding:15px;
+            border-radius:10px;
+            border:1px solid #e1ece5;
+            margin-bottom:20px;
+        ">
+            <%= ordem.resultado %>
+        </div>
 
         <!-- FOTOS -->
-        <h3 style="margin-top:25px;">📸 Fotos da Ordem</h3>
+        <h3 style="color:#083b1d; margin-top:20px;"><i class="fa-solid fa-image"></i> Fotos da Ordem</h3>
 
-        <div class="galeria">
+        <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:15px;">
+
             <% if (fotos.length === 0) { %>
                 <p style="color:#777;">Nenhuma foto enviada.</p>
             <% } else { %>
                 <% fotos.forEach(f => { %>
-                    <div class="foto-item">
-                        <img src="/<%= f.caminho %>" onclick="abrirZoom('/<%= f.caminho %>')">
-                        <span class="foto-legenda">
+                    <div style="width:160px; text-align:center;">
+                        <img src="/<%= f.caminho %>"
+                             onclick="abrirZoom('/<%= f.caminho %>')"
+                             style="width:160px; height:120px; border-radius:10px; object-fit:cover; cursor:pointer; box-shadow:0 2px 6px #00000025;">
+                        <div style="font-size:13px; margin-top:5px; opacity:0.8;">
                             <%= f.tipo === 'abertura' ? 'Abertura' : 'Fechamento' %>
-                        </span>
+                        </div>
 
-                        <form method="POST" action="/os_fotos/<%= f.id %>/delete" onsubmit="return confirm('Excluir esta foto?');">
-                            <button class="btn-delete-foto">Excluir</button>
+                        <!-- botão excluir foto -->
+                        <form method="POST"
+                              action="/os_fotos/<%= f.id %>/delete"
+                              onsubmit="return confirm('Excluir esta foto?');">
+                            <button style="
+                                background:#ffb3b3;
+                                color:#8b0000;
+                                border:none;
+                                padding:6px 10px;
+                                border-radius:6px;
+                                cursor:pointer;
+                                margin-top:5px;
+                            ">Excluir</button>
                         </form>
                     </div>
                 <% }) %>
@@ -47,44 +99,79 @@
         </div>
 
         <!-- MODAL ZOOM -->
-        <div id="zoomModal" class="zoom-modal" onclick="fecharZoom()">
-            <img id="zoomImg">
+        <div id="zoomModal" style="
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.85);
+            display:none;
+            justify-content:center;
+            align-items:center;
+            z-index:2000;
+            cursor:pointer;
+        ">
+            <img id="zoomImg" style="max-width:90%; max-height:90%; border-radius:10px;">
         </div>
 
-        <p><strong>Fechada em:</strong> <%= ordem.fechada_em %></p>
+        <p style="margin-top:25px;"><strong>Fechada em:</strong> <%= ordem.fechada_em %></p>
 
-        <a href="/solicitacao/pdf/<%= ordem.id %>" class="btn-download">Baixar PDF</a>
+        <a href="/solicitacao/pdf/<%= ordem.id %>"
+           class="btn-primary"
+           style="margin-top:15px; background:#0b8a44;">
+            <i class="fa-solid fa-file-arrow-down"></i> Baixar PDF
+        </a>
 
     <% } %>
 
 </div>
 
+<!-- FORMULÁRIO DE FECHAMENTO -->
 <% if (ordem.status === "aberta") { %>
 
-<h2>Fechar esta OS</h2>
+    <h2 class="page-title" style="font-size:22px;">
+        <i class="fa-solid fa-lock"></i> Fechar esta OS
+    </h2>
 
-<form method="POST" action="/ordens/<%= ordem.id %>/fechar" 
-      enctype="multipart/form-data"
-      class="form-card">
+    <div class="card" style="
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 2px 6px #00000015;
+        max-width:650px;
+    ">
 
-    <label>Resultado do Serviço</label>
-    <textarea name="resultado" rows="4" required></textarea>
+        <form method="POST"
+              action="/ordens/<%= ordem.id %>/fechar"
+              enctype="multipart/form-data">
 
-    <label>Fotos do Serviço (opcional)</label>
-    <input type="file" name="fotos" accept="image/*" multiple>
+            <label style="font-weight:600;">Resultado do Serviço</label>
+            <textarea name="resultado"
+                      rows="4"
+                      required
+                      style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;"></textarea>
 
-    <button class="btn-save">Fechar OS</button>
-</form>
+            <label style="font-weight:600;">Fotos do Serviço (opcional)</label>
+            <input type="file" name="fotos" accept="image/*" multiple style="margin-bottom:20px;">
+
+            <button class="btn-primary">
+                <i class="fa-solid fa-lock"></i> Fechar OS
+            </button>
+
+        </form>
+    </div>
 
 <% } %>
 
 <!-- JS -->
 <script>
 function abrirZoom(src) {
-    document.getElementById('zoomModal').style.display = 'flex';
-    document.getElementById('zoomImg').src = src;
+    const modal = document.getElementById('zoomModal');
+    const img = document.getElementById('zoomImg');
+    img.src = src;
+    modal.style.display = 'flex';
 }
 function fecharZoom() {
     document.getElementById('zoomModal').style.display = 'none';
 }
+document.getElementById('zoomModal').onclick = fecharZoom;
 </script>

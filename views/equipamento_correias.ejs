@@ -2,37 +2,47 @@
     <i class="fa-solid fa-gears"></i> Correias — <%= equipamento.nome %>
 </h1>
 
-<div class="card">
-
+<!-- CARD: info do equipamento -->
+<div class="card" style="background:white; padding:20px; border-radius:12px; margin-bottom:25px; box-shadow:0 2px 6px #00000015;">
     <p><strong>ID:</strong> <%= equipamento.id %></p>
     <p><strong>Código:</strong> <%= equipamento.codigo %></p>
-
 </div>
 
-<h2 class="section-title">Registrar Consumo</h2>
+<!-- REGISTRAR CONSUMO -->
+<h2 class="page-title" style="font-size:22px; margin-top:10px;">
+    <i class="fa-solid fa-arrow-down-wide-short"></i> Registrar Consumo
+</h2>
 
-<form method="POST" action="/equipamentos/<%= equipamento.id %>/correias" class="form-card">
+<div class="card" style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 6px #00000015; max-width:500px;">
 
-    <label>Correia</label>
-    <select name="correia_id" required>
-        <option value="">Selecione</option>
-        <% listaCorreias.forEach(c => { %>
-            <option value="<%= c.id %>"><%= c.nome %> — <%= c.modelo %></option>
-        <% }) %>
-    </select>
+    <form method="POST" action="/equipamentos/<%= equipamento.id %>/correias">
 
-    <label>Quantidade</label>
-    <input type="number" min="1" name="quantidade" required>
+        <label style="font-weight:600;">Correia</label>
+        <select name="correia_id" required
+                style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
+            <option value="">Selecione</option>
+            <% listaCorreias.forEach(c => { %>
+                <option value="<%= c.id %>"><%= c.nome %> — <%= c.modelo %></option>
+            <% }) %>
+        </select>
 
-    <button class="btn-primary">Registrar</button>
-</form>
+        <label style="font-weight:600;">Quantidade</label>
+        <input type="number" min="1" name="quantidade" required
+               style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
 
-<h2 class="section-title">
+        <button class="btn-primary">
+            <i class="fa-solid fa-plus"></i> Registrar
+        </button>
+    </form>
+</div>
+
+<!-- HISTÓRICO -->
+<h2 class="page-title" style="font-size:22px; margin-top:40px;">
     <i class="fa-solid fa-boxes-stacked"></i> Histórico de Consumo
 </h2>
 
-<div class="card table-card">
-    <table class="table-modern">
+<div class="card" style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 6px #00000015;">
+    <table class="table">
         <thead>
             <tr>
                 <th>Correia</th>
@@ -40,9 +50,14 @@
                 <th>Data</th>
             </tr>
         </thead>
+
         <tbody>
             <% if (historico.length === 0) { %>
-                <tr><td colspan="3" class="empty">Nenhum consumo lançado.</td></tr>
+                <tr>
+                    <td colspan="3" style="text-align:center; opacity:0.6; padding:15px;">
+                        Nenhum consumo lançado.
+                    </td>
+                </tr>
             <% } %>
 
             <% historico.forEach(h => { %>

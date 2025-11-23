@@ -1,31 +1,72 @@
-<h1 class="page-title">Relatório de Consumo de Correias</h1>
+<h1 class="page-title">
+    <i class="fa-solid fa-chart-line"></i> Relatório de Consumo de Correias
+</h1>
 
-<form method="GET" class="form-card" style="max-width:300px;">
-    <label>Mês</label>
-    <input type="month" name="mes" value="<%= mes %>">
-    <button class="btn-save">Filtrar</button>
-</form>
+<!-- FILTRO -->
+<div class="card" style="
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+    max-width:320px;
+    margin-bottom:25px;
+">
 
-<table class="tabela" style="margin-top:20px;">
-    <thead>
-        <tr>
-            <th>Equipamento</th>
-            <th>Correia</th>
-            <th>Total Usado</th>
-        </tr>
-    </thead>
+    <form method="GET">
 
-    <tbody>
-        <% if (rel.length === 0) { %>
-            <tr><td colspan="3">Nenhum consumo registrado neste mês.</td></tr>
-        <% } %>
+        <label style="font-weight:600;">Mês</label>
+        <input type="month"
+               name="mes"
+               value="<%= mes %>"
+               style="width:100%; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #d9d9d9;">
 
-        <% rel.forEach(r => { %>
+        <button class="btn-primary" style="width:100%; text-align:center;">
+            <i class="fa-solid fa-filter"></i> Filtrar
+        </button>
+
+    </form>
+
+</div>
+
+<!-- TABELA -->
+<div class="card" style="
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 6px #00000015;
+">
+
+    <table class="table">
+        <thead>
             <tr>
-                <td><%= r.equipamento %></td>
-                <td><%= r.correia %></td>
-                <td><strong><%= r.total %></strong></td>
+                <th>Equipamento</th>
+                <th>Correia</th>
+                <th>Total Usado</th>
             </tr>
-        <% }) %>
-    </tbody>
-</table>
+        </thead>
+
+        <tbody>
+
+            <% if (rel.length === 0) { %>
+                <tr>
+                    <td colspan="3" style="text-align:center; opacity:0.6; padding:15px;">
+                        Nenhum consumo registrado neste mês.
+                    </td>
+                </tr>
+            <% } %>
+
+            <% rel.forEach(r => { %>
+                <tr>
+                    <td><%= r.equipamento %></td>
+                    <td><%= r.correia %></td>
+
+                    <td style="font-weight:700; color:#0d542c;">
+                        <%= r.total %>
+                    </td>
+                </tr>
+            <% }) %>
+
+        </tbody>
+    </table>
+
+</div>

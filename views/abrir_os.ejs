@@ -1,52 +1,43 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-file-circle-plus"></i> Abrir Ordem de Serviço
+    <i class="fa-solid fa-file-circle-plus"></i>
+    Abrir Nova Ordem de Serviço
 </h1>
 
-<div class="card" style="
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-    max-width:650px;
-">
+<div class="card form-card">
 
-    <form method="POST" action="/ordens" enctype="multipart/form-data">
+    <% if (error) { %>
+    <div class="alert-error"><%= error %></div>
+    <% } %>
 
-        <!-- Equipamento -->
-        <label style="font-weight:600;">Equipamento</label>
-        <select name="equipamento_id" required
-                style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
+    <form method="POST" action="/os/nova">
+
+        <label>Equipamento</label>
+        <select name="equipamento_id" required>
             <option value="">Selecione...</option>
             <% equipamentos.forEach(eq => { %>
                 <option value="<%= eq.id %>"><%= eq.nome %></option>
             <% }) %>
         </select>
 
-        <!-- Tipo -->
-        <label style="font-weight:600;">Tipo</label>
-        <select name="tipo" required
-                style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
+        <label>Tipo</label>
+        <select name="tipo" required>
             <option value="Mecânica">Mecânica</option>
             <option value="Elétrica">Elétrica</option>
             <option value="Preventiva">Preventiva</option>
             <option value="Corretiva">Corretiva</option>
         </select>
 
-        <!-- Descrição -->
-        <label style="font-weight:600;">Descrição</label>
-        <textarea name="descricao" rows="4" required
-                  style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;"></textarea>
+        <label>Descrição</label>
+        <textarea name="descricao" rows="4" required></textarea>
 
-        <!-- Fotos -->
-        <label style="font-weight:600;">Fotos (opcional)</label>
-        <input type="file" name="fotos" multiple accept="image/*"
-               style="margin-bottom:20px;">
-
-        <!-- Botão -->
-        <button class="btn-primary">
-            <i class="fa-solid fa-plus"></i> Abrir OS
+        <button class="btn-primary" style="width:100%; margin-top:10px;">
+            <i class="fa-solid fa-floppy-disk"></i> Abrir OS
         </button>
-
     </form>
+</div>
 
+<div style="margin-top:18px;">
+    <a href="/os" class="btn-secondary">
+        ← Voltar
+    </a>
 </div>

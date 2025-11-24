@@ -1,42 +1,42 @@
+<%- include("./partials/cabecalho") %>
+
 <h1 class="page-title">
     <i class="fa-solid fa-user-plus"></i> Novo Usuário
 </h1>
 
-<div class="card" style="
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-    max-width:600px;
-">
+<div class="card form-card">
 
     <% if (error) { %>
         <div class="alert-error"><%= error %></div>
     <% } %>
 
-    <form method="POST" action="/users/new">
+    <form method="POST" action="/users/new" class="formulario">
 
-        <!-- Login -->
-        <label style="font-weight:600;">Usuário (login / e-mail)</label>
-        <input type="text" name="usuario" required>
+        <div class="grupo">
+            <label>Usuário (login / e-mail)</label>
+            <input type="text" name="usuario" required>
+        </div>
 
-        <!-- Senha -->
-        <label style="font-weight:600;">Senha</label>
-        <input type="password" name="senha" required>
+        <div class="grupo">
+            <label>Senha</label>
+            <input type="password" name="senha" required>
+        </div>
 
-        <!-- Nome -->
-        <label style="font-weight:600;">Nome completo</label>
-        <input type="text" name="nome">
+        <div class="grupo">
+            <label>Nome completo</label>
+            <input type="text" name="nome">
+        </div>
 
-        <!-- Papel -->
-        <label style="font-weight:600;">Papel</label>
-        <select name="role" required>
-            <option value="admin">Administrador</option>
-            <option value="funcionario" selected>Funcionário</option>
-            <option value="operador">Operador</option>
-        </select>
+        <div class="grupo">
+            <label>Papel</label>
+            <select name="role" required>
+                <option value="admin">Administrador</option>
+                <option value="funcionario" selected>Funcionário</option>
+                <option value="operador">Operador</option>
+            </select>
+        </div>
 
-        <button class="btn-primary" style="margin-top:20px;">
+        <button class="btn btn-verde-claro btn-full">
             <i class="fa-solid fa-save"></i> Salvar Usuário
         </button>
 
@@ -44,3 +44,4 @@
 
 </div>
 
+<%- include("./partials/rodape") %>

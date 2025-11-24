@@ -1,0 +1,65 @@
+<%- include("./partials/cabecalho") %>
+
+<h1 class="page-title">
+    <i class="fa-solid fa-clipboard-list"></i>
+    Relatório de Ordens de Serviço
+</h1>
+
+<div class="card tabela-card">
+
+    <div class="info-relatorio">
+        <p><strong>Gerado em:</strong> <%= dataGeracao %></p>
+        <p><strong>Total de OS:</strong> <%= ordens.length %></p>
+    </div>
+
+    <table class="tabela">
+        <thead>
+            <tr>
+                <th style="width:55px;">ID</th>
+                <th>Equipamento</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th style="width:140px;">Abertura / Fechamento</th>
+                <th style="width:120px;">Técnico</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (ordens.length === 0) { %>
+                <tr><td colspan="7" class="empty">Nenhuma ordem encontrada.</td></tr>
+            <% } %>
+
+            <% ordens.forEach(o => { %>
+                <tr>
+                    <td><%= o.id %></td>
+                    <td><%= o.equipamento_nome || ('#' + (o.equipamento_id || '-')) %></td>
+                    <td><%= o.tipo || '-' %></td>
+                    <td><%= o.descricao ? (o.descricao.length > 120 ? o.descricao.substring(0,120)+'…' : o.descricao) : '-' %></td>
+                    <td>
+                        <span class="tag <%= o.status === 'Fechada' ? 'cinza-escuro' : (o.status === 'Em Andamento' ? 'verde-escuro' : 'cinza-claro') %>">
+                            <%= o.status || 'Aberta' %>
+                        </span>
+                    </td>
+                    <td>
+                        <div><small><strong>Abertura:</strong> <%= o.data_abertura || '-' %></small></div>
+                        <div><small><strong>Fechamento:</strong> <%= o.data_fechamento || '-' %></small></div>
+                    </td>
+                    <td><%= o.tecnico || '-' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<div class="relatorio-actions">
+    <a href="/os/relatorio/pdf" target="_blank" class="btn btn-verde-escuro">
+        <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+    </a>
+
+    <a href="/os" class="btn btn-cinza-escuro">
+        ← Voltar
+    </a>
+</div>
+
+<%- include("./partials/rodape") %>

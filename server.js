@@ -1066,35 +1066,26 @@ app.get('/', authRequired, async (req, res) => {
       GROUP BY tipo
     `);
 
-    // Quantidade por mês (YYYY-MM)
+    // Quantidade por mês
     const porMes = await allAsync(`
       SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
       FROM ordens
       GROUP BY mes
       ORDER BY mes ASC
-    `); 
-    
-    // Top correias (para gráfico)
-    const correiasTop = await allAsync(`
-      SELECT nome, quantidade 
-      FROM correias
-      ORDER BY quantidade DESC
-      LIMIT 10
     `);
 
     res.render('dashboard', {
-  active: 'dashboard',
-  totais: {
-    equipamentos: totalEquip?.c || 0,
-    abertas: totalAbertas?.c || 0,
-    fechadas: totalFechadas?.c || 0
-  },
-  tipos,
-  porMes,
-  ultimas
-  correiasTop 
-});
-
+      active: 'dashboard',
+      totais: {
+        equipamentos: totalEquip?.c || 0,
+        abertas: totalAbertas?.c || 0,
+        fechadas: totalFechadas?.c || 0
+      },
+      tipos,
+      porMes,
+      ultimas,
+      correiasTop: {}  // 👈 evita erro no EJS
+    });
 
   } catch (err) {
     console.error(err);

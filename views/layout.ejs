@@ -19,7 +19,7 @@
 
 <body>
 
-    <!-- BOTÃO MENU (mobile + desktop) -->
+    <!-- BOTÃO MENU -->
     <button id="menuToggle" class="menu-toggle smooth">
         <img 
             src="<%= session && session.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
@@ -27,7 +27,7 @@
             onerror="this.src='/img/logo_menu_256.png'">
     </button>
 
-    <!-- SIDEBAR LATERAL -->
+    <!-- SIDEBAR ORIGINAL -->
     <aside id="sidebar" class="sidebar smooth">
 
         <div class="logo-area">
@@ -81,12 +81,11 @@
         </ul>
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL (SEM TOPBAR) -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <main id="mainContent" class="main-content smooth">
         <%- body %>
     </main>
 
-    <!-- SCRIPT DO MENU -->
     <script>
         const btn = document.getElementById("menuToggle");
         const sidebar = document.getElementById("sidebar");

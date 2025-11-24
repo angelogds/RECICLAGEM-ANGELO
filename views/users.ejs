@@ -1,21 +1,18 @@
+<%- include("./partials/cabecalho") %>
+
 <h1 class="page-title">
     <i class="fa-solid fa-users"></i> Usuários
 </h1>
 
-<div style="margin-bottom:20px;">
-    <a href="/users/new" class="btn-primary">
+<div class="top-actions">
+    <a href="/users/new" class="btn btn-verde-claro">
         <i class="fa-solid fa-plus"></i> Novo Usuário
     </a>
 </div>
 
-<div class="card" style="
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-">
+<div class="card tabela-card">
 
-    <table class="table">
+    <table class="tabela">
         <thead>
             <tr>
                 <th>ID</th>
@@ -27,12 +24,9 @@
         </thead>
 
         <tbody>
-
             <% if (users.length === 0) { %>
                 <tr>
-                    <td colspan="5" style="text-align:center; opacity:0.6; padding:15px;">
-                        Nenhum usuário cadastrado.
-                    </td>
+                    <td colspan="5" class="empty">Nenhum usuário cadastrado.</td>
                 </tr>
             <% } %>
 
@@ -45,26 +39,25 @@
 
                     <td class="actions">
 
-                        <a href="/users/<%= u.id %>/edit"
-                           class="btn-edit"
-                           title="Editar">
+                        <a href="/users/<%= u.id %>/edit" class="action-btn btn-edit">
                             <i class="fa-solid fa-pen"></i>
+                            <span class="btn-label">Editar</span>
                         </a>
 
-                        <form method="POST"
-                              action="/users/<%= u.id %>/delete"
-                              onsubmit="return confirm('Excluir usuário?');"
-                              style="display:inline-block;">
-                            <button class="btn-delete" title="Excluir">
+                        <form method="POST" action="/users/<%= u.id %>/delete"
+                              onsubmit="return confirm('Excluir usuário?');">
+                            <button class="action-btn btn-del">
                                 <i class="fa-solid fa-trash"></i>
+                                <span class="btn-label">Excluir</span>
                             </button>
                         </form>
 
                     </td>
                 </tr>
             <% }) %>
-
         </tbody>
     </table>
 
 </div>
+
+<%- include("./partials/rodape") %>

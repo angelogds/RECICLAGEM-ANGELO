@@ -1,21 +1,16 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-list-check"></i> Ordens de Serviço
+    <i class="fa-solid fa-clipboard-list"></i>
+    Ordens de Serviço
 </h1>
 
-<div style="margin-bottom:20px;">
-    <a href="/ordens/novo" class="btn-primary">
+<div style="margin-bottom: 20px;">
+    <a href="/os/nova" class="btn-primary">
         <i class="fa-solid fa-plus"></i> Abrir Nova OS
     </a>
 </div>
 
-<div class="card" style="
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-">
-
-    <table class="table">
+<div class="card" style="overflow-x:auto;">
+    <table class="table-modern">
         <thead>
             <tr>
                 <th>ID</th>
@@ -31,77 +26,64 @@
         <tbody>
 
             <% if (ordens.length === 0) { %>
-                <tr>
-                    <td colspan="7" style="text-align:center; opacity:0.6; padding:15px;">
-                        Nenhuma ordem encontrada.
-                    </td>
-                </tr>
+            <tr>
+                <td colspan="7" class="empty">Nenhuma OS encontrada.</td>
+            </tr>
             <% } %>
 
             <% ordens.forEach(o => { %>
-                <tr>
-                    <td><%= o.id %></td>
-                    <td><%= o.equipamento_nome || '-' %></td>
-                    <td><%= o.tipo %></td>
-                    <td><%= o.solicitante %></td>
+            <tr>
+                <td><%= o.id %></td>
+                <td><%= o.equipamento %></td>
+                <td><%= o.tipo %></td>
+                <td><%= o.solicitante %></td>
 
-                    <td>
-                        <% if (o.status === 'aberta') { %>
-                            <span style="
-                                background:#d8f3dc;
-                                color:#064e3b;
-                                padding:6px 10px;
-                                border-radius:6px;
-                                font-weight:600;
-                                font-size:13px;
-                            ">Aberta</span>
-                        <% } else { %>
-                            <span style="
-                                background:#eee;
-                                padding:6px 10px;
-                                border-radius:6px;
-                                font-weight:600;
-                                font-size:13px;
-                            ">Fechada</span>
-                        <% } %>
-                    </td>
+                <td>
+                    <% if (o.status === 'Aberta') { %>
+                        <span class="tag green">Aberta</span>
+                    <% } else { %>
+                        <span class="tag warn">Fechada</span>
+                    <% } %>
+                </td>
 
-                    <td><%= o.aberta_em %></td>
+                <td><%= o.aberta_em %></td>
 
-                    <td class="actions">
+                <td class="actions">
 
-                        <!-- Ver -->
-                        <a href="/ordens/<%= o.id %>" class="btn-edit" title="Ver OS">
-                            <i class="fa-solid fa-eye"></i>
-                        </a>
+                    <!-- Editar -->
+                    <a href="/os/<%= o.id %>/editar" class="btn-action btn-edit">
+                        <i class="fa-solid fa-pen"></i>
+                        <span class="btn-label">Editar</span>
+                    </a>
 
-                        <!-- Fechar -->
-                        <% if (session.role === 'admin' || (session.role === 'operador' && o.solicitante === session.usuario)) { %>
-                            <form method="POST"
-                                  action="/ordens/<%= o.id %>/fechar"
-                                  style="display:inline-block;">
-                                <input type="hidden" name="resultado" value="Fechado via lista">
-                                <button class="btn-edit" style="background:#0b6b2e; color:white;" title="Fechar OS">
-                                    <i class="fa-solid fa-lock"></i>
-                                </button>
-                            </form>
-                        <% } %>
+                    <!-- Ver -->
+                    <a href="/os/<%= o.id %>" class="btn-action btn-view" style="background:#0b5e33;">
+                        <i class="fa-solid fa-eye"></i>
+                        <span class="btn-label">Ver</span>
+                    </a>
 
-                        <!-- Excluir -->
-                        <form method="POST"
-                              action="/ordens/<%= o.id %>/delete"
-                              onsubmit="return confirm('Excluir essa OS?');"
-                              style="display:inline-block;">
-                            <button class="btn-delete" title="Excluir">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
+                    <!-- Fechar -->
+                    <% if (o.status === 'Aberta') { %>
+                    <a href="/os/<%= o.id %>/fechar" class="btn-action" style="background:#0d6efd;">
+                        <i class="fa-solid fa-lock"></i>
+                        <span class="btn-label">Fechar</span>
+                    </a>
+                    <% } %>
 
-                    </td>
-                </tr>
+                    <!-- Excluir -->
+                    <form method="POST" action="/os/<%= o.id %>/delete" 
+                          onsubmit="return confirm('Excluir esta OS?');"
+                          style="display:inline;">
+                        <button class="btn-action btn-delete">
+                            <i class="fa-solid fa-trash"></i>
+                            <span class="btn-label">Excluir</span>
+                        </button>
+                    </form>
+
+                </td>
+            </tr>
             <% }) %>
 
         </tbody>
     </table>
-
 </div>

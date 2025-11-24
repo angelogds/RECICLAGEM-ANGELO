@@ -1,64 +1,98 @@
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
-    <i class="fa-solid fa-gear"></i>
-    Menu do Equipamento
+    <i class="fa-solid fa-bars"></i>
+    Menu — <%= equipamento.nome %>
 </h1>
 
-<div class="card" style="text-align:center; padding:30px;">
+<div class="card" style="padding:25px;">
 
-    <h2 style="color:var(--green-900); margin-bottom:20px;">
-        <%= equipamento.nome %>
-    </h2>
+    <!-- INFO DO EQUIPAMENTO -->
+    <div style="text-align:center; margin-bottom:20px;">
+        
+        <!-- Foto -->
+        <% if (equipamento.imagem) { %>
+            <img src="/<%= equipamento.imagem %>" 
+                 class="thumb"
+                 style="width:160px; height:140px; border-radius:12px; margin-bottom:10px;">
+        <% } else { %>
+            <img src="/img/placeholder.png" 
+                 class="thumb"
+                 style="width:160px; height:140px; border-radius:12px; margin-bottom:10px;">
+        <% } %>
 
-    <!-- FOTO -->
-    <% if (equipamento.foto) { %>
-        <img src="/uploads/<%= equipamento.foto %>" 
-             class="thumb" 
-             style="width:150px; height:120px; margin-bottom:20px;">
-    <% } else { %>
-        <img src="/img/placeholder.png" 
-             class="thumb" 
-             style="width:150px; height:120px; margin-bottom:20px;">
-    <% } %>
+        <h2 style="font-size:22px; color:#0d3d25; font-weight:800; margin-bottom:6px;">
+            <%= equipamento.nome %>
+        </h2>
 
-    <!-- MENU GRID -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:20px; margin-top:20px;">
+        <p style="font-size:14px; color:#0d3d25; margin-top:4px;">
+            <strong>Modelo:</strong> <%= equipamento.modelo || "-" %> &nbsp;|&nbsp;
+            <strong>Código:</strong> <%= equipamento.codigo || "-" %> &nbsp;|&nbsp;
+            <strong>Local:</strong> <%= equipamento.local || "-" %>
+        </p>
+    </div>
 
-        <a href="/equipamentos/<%= equipamento.id %>/editar" class="action-btn btn-edit">
+    <!-- BOTÕES DO MENU -->
+    <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:20px;">
+
+        <!-- EDITAR -->
+        <a href="/equipamentos/<%= equipamento.id %>/editar"
+           class="action-btn btn-edit">
             <i class="fa-solid fa-pen"></i>
             <span class="btn-label">Editar</span>
         </a>
 
-        <a href="/equipamentos/<%= equipamento.id %>/qr" class="action-btn btn-qr">
-            <i class="fa-solid fa-qrcode"></i>
-            <span class="btn-label-dark">QR Code</span>
-        </a>
-
-        <a href="/equipamentos/<%= equipamento.id %>/historico" class="action-btn btn-hist">
+        <!-- HISTÓRICO -->
+        <a href="/equipamentos/<%= equipamento.id %>/historico"
+           class="action-btn btn-hist">
             <i class="fa-solid fa-clock-rotate-left"></i>
-            <span class="btn-label">Histórico</span>
+            <span class="btn-label">Hist.</span>
         </a>
 
-        <a href="/equipamentos/<%= equipamento.id %>/correias" class="action-btn btn-corr">
+        <!-- CORREIAS -->
+        <a href="/equipamentos/<%= equipamento.id %>/correias"
+           class="action-btn btn-corr">
             <i class="fa-solid fa-gears"></i>
             <span class="btn-label-dark">Correias</span>
         </a>
 
-        <form method="POST" action="/equipamentos/<%= equipamento.id %>/delete"
-              onsubmit="return confirm('Excluir equipamento?');">
-            <button class="action-btn btn-del">
-                <i class="fa-solid fa-trash"></i>
-                <span class="btn-label">Excluir</span>
-            </button>
-        </form>
+        <!-- ABRIR OS -->
+        <a href="/ordens/novo?equipamento_id=<%= equipamento.id %>"
+           class="action-btn btn-verde-claro">
+            <i class="fa-solid fa-file-circle-plus"></i>
+            <span class="btn-label">Abrir OS</span>
+        </a>
+
+        <!-- VER OS DO EQUIPAMENTO -->
+        <a href="/equipamentos/<%= equipamento.id %>/historico#os"
+           class="action-btn btn-qr">
+            <i class="fa-solid fa-list-check"></i>
+            <span class="btn-label">OS</span>
+        </a>
+
+        <!-- BAIXA DE CORREIAS -->
+        <a href="/equipamentos/<%= equipamento.id %>/baixar"
+           class="action-btn btn-verde-escuro">
+            <i class="fa-solid fa-arrow-down"></i>
+            <span class="btn-label">Baixar</span>
+        </a>
+
+        <!-- QR CODE -->
+        <a href="/equipamentos/<%= equipamento.id %>/qrcode"
+           class="action-btn btn-qr">
+            <i class="fa-solid fa-qrcode"></i>
+            <span class="btn-label">QR</span>
+        </a>
+
+        <!-- VOLTAR -->
+        <a href="/equipamentos"
+           class="action-btn btn-cinza-escuro">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="btn-label">Voltar</span>
+        </a>
 
     </div>
 
 </div>
-
-<a href="/equipamentos" class="btn btn-cinza-escuro" style="margin-top:12px;">
-    ← Voltar
-</a>
 
 <%- include("./partials/rodape") %>

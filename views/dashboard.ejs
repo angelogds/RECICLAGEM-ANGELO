@@ -1,71 +1,75 @@
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
-  <i class="fa-solid fa-chart-pie"></i>
-  Dashboard
+    <i class="fa-solid fa-chart-line"></i>
+    Dashboard
 </h1>
 
+<!-- GRID – 4 CARDS LADO A LADO -->
 <div class="grid-cards">
-  <div class="metric-card card">
-    <h3>Total de Equipamentos</h3>
-    <p class="metric-value"><%= typeof equipamentosCount !== 'undefined' ? equipamentosCount : 0 %></p>
-  </div>
 
-  <div class="metric-card card">
-    <h3>Ordens Abertas</h3>
-    <p class="metric-value"><%= typeof ordensAbertas !== 'undefined' ? ordensAbertas : 0 %></p>
-  </div>
+    <div class="metric-card">
+        <h3>Total de Equipamentos</h3>
+        <div class="metric-value"><%= equipamentosCount || 0 %></div>
+    </div>
 
-  <div class="metric-card card">
-    <h3>Correias em Estoque (itens)</h3>
-    <p class="metric-value"><%= typeof correiasCount !== 'undefined' ? correiasCount : 0 %></p>
-  </div>
+    <div class="metric-card">
+        <h3>Ordens Abertas</h3>
+        <div class="metric-value"><%= ordensAbertas || 0 %></div>
+    </div>
 
-  <div class="metric-card card">
-    <h3>Técnicos Ativos</h3>
-    <p class="metric-value"><%= typeof tecnicosCount !== 'undefined' ? tecnicosCount : 0 %></p>
-  </div>
+    <div class="metric-card">
+        <h3>Correias em Estoque (Itens)</h3>
+        <div class="metric-value"><%= correiasCount || 0 %></div>
+    </div>
+
+    <div class="metric-card">
+        <h3>Técnicos Ativos</h3>
+        <div class="metric-value"><%= tecnicosCount || 0 %></div>
+    </div>
+
 </div>
 
+<!-- GRÁFICO 1 -->
 <div class="card chart-card">
-  <h2>Ordens por Tipo</h2>
-  <canvas id="chartOrdensTipo" width="600" height="260"></canvas>
+    <h2>Ordens por Tipo</h2>
+    <canvas id="chartOrdensTipo"></canvas>
 </div>
 
+<!-- GRÁFICO 2 -->
 <div class="card chart-card">
-  <h2>Top 10 Correias — Estoque</h2>
-  <canvas id="chartCorreias" width="600" height="260"></canvas>
+    <h2>Top 10 Correias — Estoque</h2>
+    <canvas id="chartCorreias"></canvas>
 </div>
 
 <div class="relatorio-actions">
-  <a href="/relatorios/gerar-pdf-dashboard" class="btn btn-verde-escuro">
-    <i class="fa-solid fa-file-pdf"></i> Exportar PDF do Dashboard
-  </a>
+    <a href="/relatorios/gerar-pdf-dashboard" class="btn btn-verde-escuro">
+        <i class="fa-solid fa-file-pdf"></i> Exportar PDF do Dashboard
+    </a>
 
-  <a href="/relatorios" class="btn btn-cinza-escuro">Ver relatórios</a>
+    <a href="/relatorios" class="btn btn-cinza-escuro">Ver relatórios</a>
 </div>
 
 <%- include("./partials/rodape") %>
 
 <script>
-  window.REL_ORDENS = <%- JSON.stringify(typeof ordensPorTipo !== 'undefined' ? ordensPorTipo : {}) %>;
-  window.REL_CORREIAS = <%- JSON.stringify(typeof correiasTop !== 'undefined' ? correiasTop : {}) %>;
+  window.REL_ORDENS = <%- JSON.stringify(ordensPorTipo || {}) %>;
+  window.REL_CORREIAS = <%- JSON.stringify(correiasTop || {}) %>;
 
   (function(){
     if (typeof Chart === 'undefined') return;
 
     try {
-      const ordensData = window.REL_ORDENS || {};
-      const labels1 = Object.keys(ordensData);
-      const values1 = Object.values(ordensData);
 
+      /* === GRÁFICO 1 === */
       const ctx1 = document.getElementById('chartOrdensTipo').getContext('2d');
+
       new Chart(ctx1, {
         type: 'pie',
         data: {
-          labels: labels1,
+          labels: Object.keys(window.REL_ORDENS),
           datasets: [{
-            data: values1,
+            data: Object.values(window.REL_ORDENS),
             borderWidth: 0
           }]
         },
@@ -75,19 +79,16 @@
         }
       });
 
-      const correiasData = window.REL_CORREIAS || {};
-      const labels2 = Object.keys(correiasData);
-      const values2 = Object.values(correiasData);
-
+      /* === GRÁFICO 2 === */
       const ctx2 = document.getElementById('chartCorreias').getContext('2d');
+
       new Chart(ctx2, {
         type: 'bar',
         data: {
-          labels: labels2,
+          labels: Object.keys(window.REL_CORREIAS),
           datasets: [{
             label: 'Quantidade',
-            data: values2,
-            borderWidth: 0
+            data: Object.values(window.REL_CORREIAS),
           }]
         },
         options: {
@@ -96,8 +97,10 @@
           plugins: { legend: { display: false } }
         }
       });
+
     } catch (e) {
-      console.warn('Erro ao inicializar gráficos do dashboard', e);
+      console.warn("Erro gráfico:", e);
     }
+
   })();
 </script>

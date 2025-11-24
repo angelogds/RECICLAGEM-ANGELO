@@ -1,4 +1,3 @@
-<!-- dashboard.ejs -->
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
@@ -49,11 +48,9 @@
 <%- include("./partials/rodape") %>
 
 <script>
-  // dados passados pelo servidor (são opcionais)
-  window.REL_ORDENS = <%- JSON.stringify(ordensPorTipo || {}) %>;
-  window.REL_CORREIAS = <%- JSON.stringify(correiasTop || {}) %>;
+  window.REL_ORDENS = <%- JSON.stringify(typeof ordensPorTipo !== 'undefined' ? ordensPorTipo : {}) %>;
+  window.REL_CORREIAS = <%- JSON.stringify(typeof correiasTop !== 'undefined' ? correiasTop : {}) %>;
 
-  // desenhar gráficos somente se Chart estiver disponível
   (function(){
     if (typeof Chart === 'undefined') return;
 

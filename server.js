@@ -1,11 +1,12 @@
-// server.js — Sistema de Manutenção completo
+// server.js — PARTE 1/4
+// Sistema de Manutenção — Configuração inicial, DB, helpers, auth, rotas públicas
 // Requer: express, express-ejs-layouts, express-session, ejs, sqlite3, multer, pdfkit, bcrypt, nodemailer, uuid, qrcode
 
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
-const path = require('path');
-const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const multer = require('multer');
 const PDFDocument = require('pdfkit');
@@ -13,42 +14,47 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const QRCode = require('qrcode');
+const ejs = require('ejs');
 
+// -------------------------- CONFIGURAÇÕES GERAIS --------------------------
 const app = express();
 const PORT = process.env.PORT || 8080;
 const DB_FILE = path.join(__dirname, 'database.sqlite');
 
-// ---------- Global middlewares ----------
+// Public (static), body parser
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// trust proxy for Railway / Heroku
+// Trust proxy (Heroku / Railway) — configura cookie secure se for HTTPS
 app.set('trust proxy', 1);
 
-// ---------- Session ----------
+// -------------------------- SESSÃO --------------------------
 app.use(session({
   secret: process.env.SESSION_SECRET || 'segredo-super-forte-123',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
+  cookie: {
+    secure: (process.env.COOKIE_SECURE === 'true') || false,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
-// expose session + default error to views (avoid undefined in layout)
+// Expor sessão e variáveis padrão para views (evita undefined no layout)
 app.use((req, res, next) => {
   res.locals.session = req.session;
   res.locals.error = null;
   next();
 });
 
-// ---------- View engine & layouts ----------
+// -------------------------- VIEW ENGINE --------------------------
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
-app.set('layout', 'layout');
+app.set('layout', 'layout'); // default layout ejs/layout.ejs
 
-// ---------- Uploads dir safe creation ----------
+// -------------------------- UPLOADS (Multer) --------------------------
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
-// If uploads path exists but is a file, remove it and create dir
 try {
   if (fs.existsSync(uploadsDir) && !fs.lstatSync(uploadsDir).isDirectory()) {
     fs.unlinkSync(uploadsDir);
@@ -58,19 +64,19 @@ try {
   console.error("Erro ao garantir uploads dir:", e);
 }
 
-// ---------- Multer (uploads) ----------
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, uploadsDir);
   },
   filename(req, file, cb) {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + unique + path.extname(file.originalname));
+    const safeName = file.fieldname + '-' + unique + path.extname(file.originalname);
+    cb(null, safeName);
   }
 });
 const upload = multer({ storage });
 
-// ---------- Mailer (opcional) ----------
+// -------------------------- MAILER (opcional) --------------------------
 let transporter = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   transporter = nodemailer.createTransport({
@@ -83,13 +89,13 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   console.log('Aviso: SMTP não configurado. Links de reset serão exibidos no console.');
 }
 
-// ---------- Database ----------
+// -------------------------- BANCO DE DADOS (SQLite) --------------------------
 const db = new sqlite3.Database(DB_FILE, (err) => {
   if (err) return console.error('Erro ao conectar no SQLite:', err);
   console.log('SQLite conectado em', DB_FILE);
 });
 
-// ---------- Create tables ----------
+// Criação das tabelas principais
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS usuarios (
@@ -97,7 +103,8 @@ db.serialize(() => {
       usuario TEXT UNIQUE,
       senha TEXT,
       nome TEXT,
-      role TEXT DEFAULT 'funcionario'
+      role TEXT DEFAULT 'funcionario',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
@@ -106,7 +113,8 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       usuario_id INTEGER,
       token TEXT,
-      expires_at DATETIME
+      expires_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
@@ -133,23 +141,20 @@ db.serialize(() => {
       aberta_em DATETIME DEFAULT CURRENT_TIMESTAMP,
       fechada_em DATETIME,
       resultado TEXT,
-      FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id)
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
-  // Fotos da OS
   db.run(`
     CREATE TABLE IF NOT EXISTS os_fotos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       os_id INTEGER,
       caminho TEXT,
       tipo TEXT,          -- 'abertura' ou 'fechamento'
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (os_id) REFERENCES ordens(id)
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
-  // Correias / estoque
   db.run(`
     CREATE TABLE IF NOT EXISTS correias (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -166,9 +171,7 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       equipamento_id INTEGER,
       correia_id INTEGER,
-      quantidade_usada INTEGER DEFAULT 1,
-      FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
-      FOREIGN KEY (correia_id) REFERENCES correias(id)
+      quantidade_usada INTEGER DEFAULT 1
     );
   `);
 
@@ -178,14 +181,12 @@ db.serialize(() => {
       equipamento_id INTEGER,
       correia_id INTEGER,
       quantidade INTEGER,
-      data DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (equipamento_id) REFERENCES equipamentos(id),
-      FOREIGN KEY (correia_id) REFERENCES correias(id)
+      data DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 });
 
-// ---------- DB helpers ----------
+// -------------------------- DB HELPERS (async) --------------------------
 function runAsync(sql, params = []) {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
@@ -211,7 +212,7 @@ function getAsync(sql, params = []) {
   });
 }
 
-// ---------- Seed (executa seed.js automaticamente se presente) ----------
+// -------------------------- SEED (executa seed.js automaticamente se presente) --------------------------
 if (fs.existsSync(path.join(__dirname, 'seed.js'))) {
   try {
     console.log('➡ Executando seed.js automaticamente...');
@@ -229,8 +230,7 @@ if (fs.existsSync(path.join(__dirname, 'seed.js'))) {
   }
 }
 
-// ========== AUTH / ROLES MIDDLEWARES ==========
-
+// -------------------------- AUTH / ROLES MIDDLEWARES --------------------------
 function authRequired(req, res, next) {
   if (!req.session.usuario) return res.redirect('/login');
   next();
@@ -251,20 +251,23 @@ function allowRoles(...roles) {
   };
 }
 
-// ========== ROUTES ==========
+// -------------------------- ROTAS PÚBLICAS / AUTENTICAÇÃO --------------------------
 
-// ---------- public/open routes (login / forgot / reset / inicio) ----------
+// Rota de entrada pública (sem layout padrão)
 app.get('/inicio', (req, res) => res.render('inicio', { layout: false }));
 
+// Login: mostrar formulário
 app.get('/login', (req, res) => {
   res.render('login', { layout: false, error: null });
 });
 
+// Login: autenticar
 app.post('/login', async (req, res) => {
   const { usuario, senha } = req.body;
   try {
     const user = await getAsync(`SELECT * FROM usuarios WHERE usuario = ?`, [usuario]);
     if (!user) return res.render('login', { layout: false, error: 'Usuário ou senha incorretos.' });
+
     const match = await bcrypt.compare(senha, user.senha);
     if (!match) return res.render('login', { layout: false, error: 'Usuário ou senha incorretos.' });
 
@@ -279,13 +282,15 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Logout
 app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
 
-// Forgot/reset (layout false)
+// Forgot password: form
 app.get('/forgot', (req, res) => res.render('forgot', { layout: false, error: null, info: null }));
 
+// Forgot password: gerar token e enviar por email (ou console)
 app.post('/forgot', async (req, res) => {
   const { usuario } = req.body;
   try {
@@ -297,7 +302,7 @@ app.post('/forgot', async (req, res) => {
 
     await runAsync(`INSERT INTO password_tokens (usuario_id, token, expires_at) VALUES (?, ?, ?)`, [user.id, token, expiresAt]);
 
-    const baseUrl = process.env.BASE_URL || `https://${req.headers.host}`;
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.headers.host}`;
     const resetUrl = `${baseUrl}/reset/${token}`;
 
     if (transporter) {
@@ -305,12 +310,13 @@ app.post('/forgot', async (req, res) => {
         from: process.env.SMTP_FROM || 'no-reply@sistema.com',
         to: user.usuario,
         subject: 'Recuperar senha - Sistema',
-        html: `<p>Clique: <a href="${resetUrl}">${resetUrl}</a></p>`
+        html: `<p>Clique para resetar a senha: <a href="${resetUrl}">${resetUrl}</a></p>`
       });
       return res.render('forgot', { layout: false, error: null, info: 'E-mail enviado! Verifique sua caixa.' });
     }
 
-    console.log('Link de recuperação:', resetUrl);
+    // Fallback: mostrar link no console e informar ao usuário
+    console.log('Link de recuperação (console):', resetUrl);
     return res.render('forgot', { layout: false, error: null, info: 'Link gerado (verifique o console do servidor).' });
   } catch (err) {
     console.error(err);
@@ -318,8 +324,12 @@ app.post('/forgot', async (req, res) => {
   }
 });
 
-app.get('/reset/:token', (req, res) => res.render('reset', { layout: false, token: req.params.token, error: null }));
+// Reset password: form
+app.get('/reset/:token', (req, res) => {
+  res.render('reset', { layout: false, token: req.params.token, error: null });
+});
 
+// Reset password: aplicar a nova senha
 app.post('/reset/:token', async (req, res) => {
   const { token } = req.params;
   const { senha } = req.body;
@@ -339,12 +349,20 @@ app.post('/reset/:token', async (req, res) => {
   }
 });
 
-// ========== USERS (Admin only) ==========
+// -------------------------- FIM PARTE 1/4 --------------------------
+// Peça a Parte 2 para continuar (Usuários/Equipamentos/Correias/OS/...).
+// server.js — PARTE 2/4
+// Usuários (admin), Equipamentos, Correias, Associação e Baixas
+// COLE esta parte imediatamente após a Parte 1/4
+
+// =======================
+// ROTAS: USERS (ADMIN)
+// =======================
 app.use('/users', authRequired, allowRoles('admin'));
 
 app.get('/users', async (req, res) => {
   try {
-    const users = await allAsync(`SELECT id, usuario, nome, role FROM usuarios ORDER BY id DESC`);
+    const users = await allAsync(`SELECT id, usuario, nome, role, created_at FROM usuarios ORDER BY id DESC`);
     res.render('users', { users, active: 'users' });
   } catch (err) {
     console.error(err);
@@ -364,7 +382,7 @@ app.post('/users/new', async (req, res) => {
   } catch (err) {
     console.error(err);
     const msg = err.message && err.message.includes('UNIQUE') ? 'Este usuário já existe.' : 'Erro ao criar usuário.';
-    res.render('users_new', { error: msg });
+    res.render('users_new', { error: msg, active: 'users' });
   }
 });
 
@@ -402,7 +420,9 @@ app.post('/users/:id/delete', async (req, res) => {
   }
 });
 
-// ========== EQUIPAMENTOS (admin + funcionario) ==========
+// =======================
+// ROTAS: EQUIPAMENTOS
+// =======================
 app.use('/equipamentos', authRequired, allowRoles('admin', 'funcionario'));
 
 app.get('/equipamentos', async (req, res) => {
@@ -481,15 +501,14 @@ app.post('/equipamentos/:id/delete', async (req, res) => {
   }
 });
 
-// QR code do equipamento (mostrar página com QR)
+// QR CODE do equipamento (mostrar página com QR)
 app.get('/equipamentos/:id/qrcode', async (req, res) => {
   try {
     const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
     if (!equipamento) return res.send('Equipamento não encontrado.');
 
-    // CORRIGIDO — remover HTTPS que quebra no container
-    const baseUrl = process.env.BASE_URL || `http://${req.headers.host}`;
-
+    // Base URL sem forçar HTTPS (melhor para containers)
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.headers.host}`;
     const url = `${baseUrl}/equipamentos/${equipamento.id}/menu`;
     const qr = await QRCode.toDataURL(url);
 
@@ -500,7 +519,50 @@ app.get('/equipamentos/:id/qrcode', async (req, res) => {
   }
 });
 
-// ========== CORREIAS / ESTOQUE (admin + funcionario) ==========
+// MENU DO EQUIPAMENTO (acessado via QR)
+app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
+  try {
+    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
+    if (!equipamento) return res.send("Equipamento não encontrado.");
+    res.render('equipamento_menu', { equipamento, active: 'equipamentos' });
+  } catch (err) {
+    console.error(err);
+    res.send("Erro ao carregar menu do equipamento.");
+  }
+});
+
+// HISTÓRICO DO EQUIPAMENTO (OS + consumo de correias)
+app.get('/equipamentos/:id/historico', authRequired, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [id]);
+    if (!equipamento) return res.send("Equipamento não encontrado.");
+
+    const ordens = await allAsync(`
+      SELECT id, tipo, status, aberta_em, fechada_em, resultado
+      FROM ordens
+      WHERE equipamento_id = ?
+      ORDER BY aberta_em DESC
+    `, [id]);
+
+    const correias = await allAsync(`
+      SELECT c.nome AS correia, cc.quantidade, cc.data
+      FROM consumo_correias cc
+      LEFT JOIN correias c ON c.id = cc.correia_id
+      WHERE cc.equipamento_id = ?
+      ORDER BY cc.data DESC
+    `, [id]);
+
+    res.render('equipamento_historico', { equipamento, ordens, correias, active: 'equipamentos' });
+  } catch (err) {
+    console.error(err);
+    res.send("Erro ao carregar histórico.");
+  }
+});
+
+// =======================
+// ROTAS: CORREIAS (ESTOQUE)
+// =======================
 app.use('/correias', authRequired, allowRoles('admin', 'funcionario'));
 
 app.get('/correias', async (req, res) => {
@@ -557,66 +619,10 @@ app.post('/correias/:id/delete', async (req, res) => {
     res.send('Erro ao deletar correia.');
   }
 });
-const PDFDocument = require("pdfkit");
-const ejs = require("ejs");
-const fs = require("fs");
-const path = require("path");
 
-// ----------------------
-// PDF: Relatório Correias
-// ----------------------
-app.get('/correias/relatorio/pdf', authRequired, async (req, res) => {
-  try {
-    const mes = req.query.mes || new Date().toISOString().slice(0, 7);
-
-    const rel = await allAsync(`
-      SELECT e.nome AS equipamento, c.nome AS correia, SUM(cc.quantidade) AS total
-      FROM consumo_correias cc
-      LEFT JOIN equipamentos e ON e.id = cc.equipamento_id
-      LEFT JOIN correias c ON c.id = cc.correia_id
-      WHERE strftime('%Y-%m', cc.data) = ?
-      GROUP BY equipamento, correia
-      ORDER BY equipamento, correia
-    `, [mes]);
-
-    // Renderiza HTML da view PDF
-    const htmlPath = path.join(__dirname, 'views', 'correias_relatorio_pdf.ejs');
-    const html = await ejs.renderFile(htmlPath, { rel, mes });
-
-    // Gera PDF
-    const doc = new PDFDocument({ size: "A4", margin: 28 });
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline; filename=relatorio_correias.pdf");
-
-    doc.pipe(res);
-
-    doc.fontSize(20).text("Relatório de Consumo de Correias", { align: "center" });
-    doc.moveDown();
-
-    doc.fontSize(12).text(`Mês: ${mes}`);
-    doc.moveDown().moveDown();
-
-    rel.forEach(r => {
-      doc.fontSize(14).text(`Equipamento: ${r.equipamento}`);
-      doc.text(`Correia: ${r.correia}`);
-      doc.text(`Quantidade consumida: ${r.total}`);
-      doc.moveDown();
-    });
-
-    if (rel.length === 0) {
-      doc.fontSize(14).text("Nenhum consumo registrado neste mês.", { align: "center" });
-    }
-
-    doc.end();
-
-  } catch (err) {
-    console.error("PDF ERROR:", err);
-    res.status(500).send("Erro ao gerar PDF.");
-  }
-});
-
-// Associação correias <-> equipamento
+// =======================
+// ASSOCIAÇÃO Correias <-> Equipamento
+// =======================
 app.get('/equipamentos/:id/correias', authRequired, allowRoles('admin', 'funcionario'), async (req, res) => {
   try {
     const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
@@ -648,7 +654,11 @@ app.post('/equipamentos/:id/correias', authRequired, allowRoles('admin', 'funcio
   }
 });
 
-// Abrir formulário de baixa
+// =======================
+// BAIXA / CONSUMO DE CORREIAS
+// =======================
+
+// Mostrar formulário de baixa para um equipamento
 app.get('/equipamentos/:id/baixar', authRequired, allowRoles('admin', 'funcionario'), async (req, res) => {
   try {
     const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
@@ -687,21 +697,9 @@ app.post('/equipamentos/:id/baixar-correia', authRequired, allowRoles('admin', '
   }
 });
 
-// ====================================================================
-// MENU DO EQUIPAMENTO (USADO PELO QR CODE)
-// ====================================================================
-app.get('/equipamentos/:id/menu', authRequired, async (req, res) => {
-  try {
-    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [req.params.id]);
-    if (!equipamento) return res.send("Equipamento não encontrado.");
-    res.render('equipamento_menu', { equipamento, active: 'equipamentos' });
-  } catch (err) {
-    console.error(err);
-    res.send("Erro ao carregar menu do equipamento.");
-  }
-});
-
-// Relatório mensal de consumo de correias
+// =======================
+// RELATÓRIO DE CONSUMO (HTML) E PDF (render EJS -> PDF)
+// =======================
 app.get('/correias/relatorio', authRequired, allowRoles('admin', 'funcionario'), async (req, res) => {
   try {
     const mes = req.query.mes || (new Date()).toISOString().slice(0,7);
@@ -721,54 +719,73 @@ app.get('/correias/relatorio', authRequired, allowRoles('admin', 'funcionario'),
   }
 });
 
-// ==============================================
-// HISTÓRICO COMPLETO DO EQUIPAMENTO
-// ==============================================
-app.get('/equipamentos/:id/historico', authRequired, async (req, res) => {
+// PDF do relatório (EJS -> HTML -> PDF)
+app.get('/correias/relatorio/pdf', authRequired, async (req, res) => {
   try {
-    const id = req.params.id;
-    const equipamento = await getAsync(`SELECT * FROM equipamentos WHERE id = ?`, [id]);
-    if (!equipamento) return res.send("Equipamento não encontrado.");
-
-    // Histórico de OS
-    const ordens = await allAsync(`
-      SELECT id, tipo, status, aberta_em, fechada_em
-      FROM ordens
-      WHERE equipamento_id = ?
-      ORDER BY aberta_em DESC
-    `, [id]);
-
-    // Histórico de correias consumidas
-    const correias = await allAsync(`
-      SELECT c.nome AS correia, cc.quantidade, cc.data
+    const mes = req.query.mes || new Date().toISOString().slice(0,7);
+    const rel = await allAsync(`
+      SELECT e.nome AS equipamento, c.nome AS correia, SUM(cc.quantidade) AS total
       FROM consumo_correias cc
+      LEFT JOIN equipamentos e ON e.id = cc.equipamento_id
       LEFT JOIN correias c ON c.id = cc.correia_id
-      WHERE cc.equipamento_id = ?
-      ORDER BY cc.data DESC
-    `, [id]);
+      WHERE strftime('%Y-%m', cc.data) = ?
+      GROUP BY equipamento, correia
+      ORDER BY equipamento, correia
+    `, [mes]);
 
-    res.render('equipamento_historico', { equipamento, ordens, correias, active: 'equipamentos' });
+    // Renderiza HTML via EJS (views/correias_relatorio_pdf.ejs)
+    const htmlPath = path.join(__dirname, 'views', 'correias_relatorio_pdf.ejs');
+    const html = await ejs.renderFile(htmlPath, { rel, mes });
+
+    // Gerar PDF simples a partir do HTML gerado (usamos PDFKit para texto)
+    // OBS: aqui apenas incluímos o HTML convertido de forma simples — para layouts complexos
+    // pode-se usar puppeteer wkhtmltopdf em produção.
+    const doc = new PDFDocument({ size: 'A4', margin: 28 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=relatorio_correias.pdf');
+    doc.pipe(res);
+
+    doc.fontSize(20).text('Relatório de Consumo de Correias', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Mês: ${mes}`);
+    doc.moveDown();
+
+    if (rel.length === 0) {
+      doc.text('Nenhum consumo registrado neste mês.', { align: 'center' });
+    } else {
+      rel.forEach(r => {
+        doc.fontSize(13).text(`Equipamento: ${r.equipamento || '—'}`);
+        doc.fontSize(12).text(`Correia: ${r.correia} — Quantidade: ${r.total}`);
+        doc.moveDown(0.5);
+      });
+    }
+
+    doc.end();
   } catch (err) {
-    console.error(err);
-    res.send("Erro ao carregar histórico.");
+    console.error('PDF ERROR:', err);
+    res.status(500).send('Erro ao gerar PDF.');
   }
 });
 
-// ============================================================
-// ========== ORDENS DE SERVIÇO (OS) — COM PERMISSÕES ==========
-// ============================================================
+// -------------------------- FIM PARTE 2/4 --------------------------
+// Peça "Parte 3" para continuar (Ordens de Serviço, fotos, PDF OS, deletar fotos, etc.).
+// server.js — PARTE 3/4
+// Rotas de ORDENS DE SERVIÇO (OS), fotos, fechamento e PDF
 
-// Aplicar middleware de login e roles permitidos
+// -------------------------------------------------------
+// Middleware global para todas as rotas de ordens
+// -------------------------------------------------------
 app.use('/ordens', authRequired, allowRoles('admin', 'funcionario', 'operador'));
 
-// ---------------------------------------------
+// -------------------------------------------------------
 // LISTAR ORDENS
-// - operador vê apenas as próprias
-// - admin e funcionário veem todas
-// ---------------------------------------------
+// - operador: vê somente as próprias
+// - admin/funcionário: veem todas
+// -------------------------------------------------------
 app.get('/ordens', async (req, res) => {
   try {
     let ordens;
+
     if (req.session.role === 'operador') {
       ordens = await allAsync(`
         SELECT o.*, e.nome AS equipamento_nome
@@ -785,6 +802,7 @@ app.get('/ordens', async (req, res) => {
         ORDER BY o.aberta_em DESC
       `);
     }
+
     res.render('ordens', { ordens, active: 'ordens' });
   } catch (err) {
     console.error(err);
@@ -792,9 +810,9 @@ app.get('/ordens', async (req, res) => {
   }
 });
 
-// ---------------------------------------------
-// FORM — ABRIR OS (com fotos possível)
-// ---------------------------------------------
+// -------------------------------------------------------
+// FORM — ABRIR OS
+// -------------------------------------------------------
 app.get('/ordens/novo', async (req, res) => {
   try {
     const equipamentos = await allAsync(`SELECT id, nome FROM equipamentos ORDER BY nome ASC`);
@@ -805,15 +823,14 @@ app.get('/ordens/novo', async (req, res) => {
   }
 });
 
-// ---------------------------------------------
-// CRIAR OS (com upload de fotos de abertura)
-// ---------------------------------------------
+// -------------------------------------------------------
+// CRIAR OS (com fotos de abertura)
+// -------------------------------------------------------
 app.post('/ordens', upload.array('fotos', 10), async (req, res) => {
   try {
     const { equipamento_id, tipo, descricao } = req.body;
     const solicitante = req.session.usuario;
 
-    // Criar OS
     const result = await runAsync(`
       INSERT INTO ordens (equipamento_id, solicitante, tipo, descricao, status)
       VALUES (?, ?, ?, ?, 'aberta')
@@ -821,11 +838,12 @@ app.post('/ordens', upload.array('fotos', 10), async (req, res) => {
 
     const osId = result.lastID;
 
-    // Salvar fotos (abertura)
+    // Fotos de abertura
     if (req.files && req.files.length > 0) {
       for (const foto of req.files) {
         await runAsync(`
-          INSERT INTO os_fotos (os_id, caminho, tipo) VALUES (?, ?, 'abertura')
+          INSERT INTO os_fotos (os_id, caminho, tipo)
+          VALUES (?, ?, 'abertura')
         `, [osId, path.join('uploads', foto.filename)]);
       }
     }
@@ -836,35 +854,32 @@ app.post('/ordens', upload.array('fotos', 10), async (req, res) => {
     res.send('Erro ao criar OS.');
   }
 });
-// ==============================================
-// DELETAR FOTO DA OS
-// ==============================================
+
+// -------------------------------------------------------
+// DELETAR UMA FOTO DA OS
+// -------------------------------------------------------
 app.post('/os_fotos/:id/delete', authRequired, allowRoles('admin', 'funcionario'), async (req, res) => {
   try {
     const fotoId = req.params.id;
 
-    // Buscar a foto
     const foto = await getAsync(`SELECT * FROM os_fotos WHERE id = ?`, [fotoId]);
-    if (!foto) return res.send("Foto não encontrada.");
+    if (!foto) return res.send('Foto não encontrada.');
 
-    // Apagar arquivo do sistema
     const filePath = path.join(__dirname, 'public', foto.caminho);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
-    // Remover banco
     await runAsync(`DELETE FROM os_fotos WHERE id = ?`, [fotoId]);
 
     res.redirect('/ordens/' + foto.os_id);
-
   } catch (err) {
     console.error(err);
-    res.send("Erro ao deletar foto.");
+    res.send('Erro ao deletar foto.');
   }
 });
 
-// ---------------------------------------------
-// VER OS (com fotos)
-// ---------------------------------------------
+// -------------------------------------------------------
+// VER UMA OS (detalhe + fotos)
+// -------------------------------------------------------
 app.get('/ordens/:id', async (req, res) => {
   try {
     const ordem = await getAsync(`
@@ -881,8 +896,11 @@ app.get('/ordens/:id', async (req, res) => {
       return res.status(403).send('Acesso negado.');
     }
 
-    // buscar fotos
-    const fotos = await allAsync(`SELECT * FROM os_fotos WHERE os_id = ? ORDER BY created_at ASC`, [req.params.id]);
+    const fotos = await allAsync(`
+      SELECT * FROM os_fotos
+      WHERE os_id = ?
+      ORDER BY created_at ASC
+    `, [req.params.id]);
 
     res.render('ordens_fechar', { ordem, fotos, active: 'ordens' });
   } catch (err) {
@@ -891,31 +909,37 @@ app.get('/ordens/:id', async (req, res) => {
   }
 });
 
-// ---------------------------------------------
-// FECHAR OS (com upload de fotos de fechamento)
-// ---------------------------------------------
+// -------------------------------------------------------
+// FECHAR UMA OS (com fotos de fechamento)
+// -------------------------------------------------------
 app.post('/ordens/:id/fechar', upload.array('fotos', 10), async (req, res) => {
   try {
     const osId = req.params.id;
-    const ordem = await getAsync(`SELECT solicitante FROM ordens WHERE id = ?`, [osId]);
+    const ordem = await getAsync(`
+      SELECT solicitante FROM ordens WHERE id = ?
+    `, [osId]);
+
     if (!ordem) return res.send('Ordem não encontrada.');
 
-    // Operador só pode fechar as próprias OS
+    // Operador só fecha as próprias OS
     if (req.session.role === 'operador' && ordem.solicitante !== req.session.usuario) {
       return res.status(403).send('Acesso negado.');
     }
 
     await runAsync(`
       UPDATE ordens
-      SET status='fechada', resultado=?, fechada_em=CURRENT_TIMESTAMP
+      SET status = 'fechada',
+          resultado = ?,
+          fechada_em = CURRENT_TIMESTAMP
       WHERE id = ?
     `, [req.body.resultado, osId]);
 
-    // Salvar fotos de fechamento
+    // Fotos de fechamento
     if (req.files && req.files.length > 0) {
       for (const foto of req.files) {
         await runAsync(`
-          INSERT INTO os_fotos (os_id, caminho, tipo) VALUES (?, ?, 'fechamento')
+          INSERT INTO os_fotos (os_id, caminho, tipo)
+          VALUES (?, ?, 'fechamento')
         `, [osId, path.join('uploads', foto.filename)]);
       }
     }
@@ -927,12 +951,11 @@ app.post('/ordens/:id/fechar', upload.array('fotos', 10), async (req, res) => {
   }
 });
 
-// ---------------------------------------------
-// PDF DA OS (com fotos incluídas)
-// ---------------------------------------------
-app.get('/solicitacao/pdf/:id', async (req, res) => {
+// -------------------------------------------------------
+// PDF COMPLETO DA OS (com fotos antes e depois)
+// -------------------------------------------------------
+app.get('/solicitacao/pdf/:id', authRequired, async (req, res) => {
   try {
-
     const ordem = await getAsync(`
       SELECT o.*, e.nome AS equipamento_nome, e.codigo AS equipamento_codigo
       FROM ordens o
@@ -946,64 +969,82 @@ app.get('/solicitacao/pdf/:id', async (req, res) => {
       return res.status(403).send('Acesso negado.');
     }
 
-    const fotos = await allAsync(`SELECT * FROM os_fotos WHERE os_id = ?`, [req.params.id]);
+    const fotos = await allAsync(`
+      SELECT * FROM os_fotos
+      WHERE os_id = ?
+      ORDER BY created_at ASC
+    `, [req.params.id]);
 
     const doc = new PDFDocument({ margin: 40 });
+
     res.setHeader('Content-Disposition', `attachment; filename=OS_${ordem.id}.pdf`);
     res.setHeader('Content-Type', 'application/pdf');
+
     doc.pipe(res);
 
+    // Cabeçalho
     doc.fontSize(20).text('Ordem de Serviço (OS)', { align: 'center' });
     doc.moveDown();
 
-    doc.fontSize(12);
-    doc.text(`ID da OS: ${ordem.id}`);
+    doc.fontSize(12).text(`ID da OS: ${ordem.id}`);
     doc.text(`Solicitante: ${ordem.solicitante}`);
-    doc.text(`Equipamento: ${ordem.equipamento_nome} (${ordem.equipamento_codigo})`);
+    doc.text(`Equipamento: ${ordem.equipamento_nome} (${ordem.equipamento_codigo || 'sem código'})`);
     doc.text(`Tipo: ${ordem.tipo}`);
+    doc.text(`Aberta em: ${ordem.aberta_em}`);
     doc.moveDown();
 
     doc.text('Descrição:');
-    doc.fontSize(11).text(ordem.descricao, { indent: 10 });
+    doc.fontSize(11).text(ordem.descricao, { indent: 14 });
     doc.moveDown();
 
     doc.fontSize(12).text(`Status: ${ordem.status}`);
     if (ordem.status === 'fechada') {
       doc.text(`Fechada em: ${ordem.fechada_em}`);
-      doc.text(`Resultado: ${ordem.resultado}`);
+      doc.text(`Resultado:`);
+      doc.fontSize(11).text(ordem.resultado, { indent: 14 });
     }
 
-    // FOTOS DA OS
+    // Fotos
     if (fotos.length > 0) {
       doc.addPage();
-      doc.fontSize(16).text("Fotos da OS", { align: "center" });
-      doc.moveDown();
+      doc.fontSize(16).text('Fotos da OS', { align: 'center' });
+      doc.moveDown(2);
 
       for (const foto of fotos) {
+        doc.fontSize(12).text(foto.tipo === 'abertura' ? 'Abertura' : 'Fechamento');
+
         try {
-          doc.fontSize(12).text(foto.tipo === 'abertura' ? 'Abertura' : 'Fechamento', { align: 'left' });
           doc.image(path.join(__dirname, 'public', foto.caminho), {
-            fit: [420, 420],
+            fit: [420, 420],   // TAMANHO IDEAL
             align: 'center'
           });
-          doc.moveDown(1.5);
         } catch (err) {
-          console.log("Erro ao carregar imagem no PDF:", err);
+          console.log('Erro ao carregar imagem no PDF:', err);
+          doc.fontSize(10).text('(Erro ao carregar imagem)');
         }
+
+        doc.moveDown(2);
       }
     }
 
     doc.end();
-
   } catch (err) {
     console.error(err);
     res.send('Erro ao gerar PDF.');
   }
 });
 
-// ---------------------- DASHBOARD ----------------------
+// -------------------------- FIM PARTE 3/4 --------------------------
+// Peça "Parte 4" para finalizar (Dashboard + Start do servidor).
+// server.js — PARTE 4/4
+// Dashboard avançado + Start
+
+// =====================================================
+// ================== DASHBOARD ========================
+// =====================================================
 app.get('/', authRequired, async (req, res) => {
   try {
+    // Totais
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
@@ -1017,14 +1058,14 @@ app.get('/', authRequired, async (req, res) => {
       LIMIT 6
     `);
 
-    // TIPOS: aqui usei ordens.tipo para gráfico de tipos de OS (se preferir outro campo ajuste)
+    // Quantidade por tipo
     const tipos = await allAsync(`
       SELECT tipo, COUNT(*) AS total
       FROM ordens
       GROUP BY tipo
     `);
 
-    // POR MÊS (YYYY-MM)
+    // Quantidade por mês (YYYY-MM)
     const porMes = await allAsync(`
       SELECT strftime('%Y-%m', aberta_em) AS mes, COUNT(*) AS total
       FROM ordens
@@ -1050,8 +1091,10 @@ app.get('/', authRequired, async (req, res) => {
   }
 });
 
-// ---------------------- START ----------------------
+// =====================================================
+// ================== START DO SERVIDOR ================
+// =====================================================
 app.listen(PORT, () => {
-  console.log(`Servidor ativo na porta ${PORT}`);
-  console.log(`SQLite conectado em ${DB_FILE}`);
+  console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`🔌 Banco SQLite conectado em: ${DB_FILE}\n`);
 });

@@ -526,3 +526,17 @@ td img, .tabela td img {
     color: #888;
     font-style: italic;
 }
+/* GRID DOS CARDS DO DASHBOARD */
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}

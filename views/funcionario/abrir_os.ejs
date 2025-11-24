@@ -1,45 +1,50 @@
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
-  <i class="fa-solid fa-plus"></i> Abrir Ordem de Serviço
+    <i class="fa-solid fa-file-circle-plus"></i>
+    Abrir Nova Ordem de Serviço
 </h1>
 
 <div class="card form-card">
-  <form method="POST" action="/ordens" enctype="multipart/form-data" class="formulario">
-    <div class="form-grid">
-      <div class="grupo">
-        <label>Equipamento</label>
-        <select name="equipamento_id">
-          <option value="">— Sem equipamento —</option>
-          <% if (equipamentos && equipamentos.forEach) { %>
-            <% equipamentos.forEach(eq => { %>
-              <option value="<%= eq.id %>" <%= (typeof req !== 'undefined' && req.query && req.query.equipamento_id==eq.id) ? 'selected' : '' %>><%= eq.nome %></option>
-            <% }) %>
-          <% } %>
-        </select>
-      </div>
 
-      <div class="grupo">
-        <label>Tipo</label>
-        <input name="tipo" required placeholder="Ex: Preventiva / Corretiva">
-      </div>
+    <form method="POST" action="/ordens" enctype="multipart/form-data" class="formulario">
 
-      <div class="grupo" style="grid-column:1 / -1;">
-        <label>Descrição do problema</label>
-        <textarea name="descricao" rows="5" required></textarea>
-      </div>
+        <div class="grupo">
+            <label>Equipamento</label>
+            <select name="equipamento_id" required>
+                <option value="">Selecione...</option>
+                <% equipamentos.forEach(eq => { %>
+                    <option value="<%= eq.id %>"><%= eq.nome %></option>
+                <% }) %>
+            </select>
+        </div>
 
-      <div class="grupo">
-    <label>Fotos de abertura</label>
-    <input type="file" name="fotos" accept="image/*" multiple>
+        <div class="grupo">
+            <label>Tipo</label>
+            <input type="text" name="tipo" required placeholder="Mecânica / Elétrica / Preventiva / Corretiva">
+        </div>
+
+        <div class="grupo">
+            <label>Descrição</label>
+            <textarea name="descricao" rows="4" required></textarea>
+        </div>
+
+        <div class="grupo">
+            <label>Fotos de Abertura (opcional)</label>
+            <!-- 🔥 CORRETO PARA MULTER -->
+            <input type="file" name="fotos" accept="image/*" multiple>
+        </div>
+
+        <button class="btn btn-verde-claro btn-full">
+            <i class="fa-solid fa-floppy-disk"></i> Abrir OS
+        </button>
+
+    </form>
+
 </div>
 
-
-    <div style="margin-top:12px; display:flex; gap:8px;">
-      <button class="btn btn-verde-claro" type="submit">Abrir OS</button>
-      <a href="/ordens" class="btn btn-cinza-escuro">Cancelar</a>
-    </div>
-  </form>
-</div>
+<a href="/ordens" class="btn btn-cinza-escuro">
+    ← Voltar
+</a>
 
 <%- include("./partials/rodape") %>

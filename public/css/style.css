@@ -147,6 +147,56 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--green-800)}
 
 /* small shaped */
 .btn-sm{padding:8px 10px;border-radius:8px;font-size:14px}
+.actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Botões com ícone + texto abaixo */
+.actions a,
+.actions button {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+}
+
+/* Ícones */
+.actions i {
+    font-size: 18px;
+}
+
+/* Texto abaixo */
+.btn-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1;
+    color: #fff;
+}
+
+/* Cores já usadas antes */
+.btn-edit { background: #198754; }
+.btn-qr { background: #0d6efd; }
+.btn-history { background: #6c757d; }
+.btn-delete { background: #dc3545; }
+
+.actions a:hover,
+.actions button:hover {
+    transform: translateY(-3px);
+    transition: 0.2s;
+}
 
 /* =========================================================
    ACTION BUTTONS (ICON + LABEL BELOW) - style "A"

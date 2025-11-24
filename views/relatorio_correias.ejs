@@ -1,63 +1,52 @@
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
-    <i class="fa-solid fa-file-lines"></i>
-    Relatório de Correias
+    <i class="fa-solid fa-chart-column"></i>
+    Relatório de Consumo de Correias
 </h1>
 
-<div class="card tabela-card">
+<div class="card">
 
-    <div class="info-relatorio">
-        <p><strong>Gerado em:</strong> <%= dataGeracao %></p>
-        <p><strong>Total de itens diferentes:</strong> <%= correias.length %></p>
+    <div class="info-relatorio" style="margin-bottom:18px;">
+        <p><strong>Gerado em:</strong> <%= new Date().toLocaleString("pt-BR") %></p>
+        <p><strong>Mês consultado:</strong> <%= mes %></p>
+        <p><strong>Total de itens:</strong> <%= rel.length %></p>
     </div>
 
     <table class="tabela">
         <thead>
             <tr>
-                <th style="width:60px;">ID</th>
-                <th>Nome</th>
-                <th>Modelo</th>
-                <th>Medida</th>
-                <th style="width:80px;">Qtd</th>
+                <th>Equipamento</th>
+                <th>Correia</th>
+                <th>Quantidade</th>
             </tr>
         </thead>
 
         <tbody>
-            <% if (correias.length === 0) { %>
+            <% if (!rel || rel.length === 0) { %>
                 <tr>
-                    <td colspan="5" class="empty">Nenhuma correia cadastrada.</td>
+                    <td colspan="3" class="empty">Nenhum consumo registrado neste período.</td>
                 </tr>
+            <% } else { %>
+                <% rel.forEach(r => { %>
+                <tr>
+                    <td><%= r.equipamento %></td>
+                    <td><%= r.correia %></td>
+                    <td><%= r.total %></td>
+                </tr>
+                <% }) %>
             <% } %>
-
-            <% correias.forEach(c => { %>
-                <tr>
-                    <td><%= c.id %></td>
-                    <td><%= c.nome %></td>
-                    <td><%= c.modelo %></td>
-                    <td><%= c.medida %></td>
-                    <td>
-                        <span class="tag verde-escuro"><%= c.quantidade %></span>
-                    </td>
-                </tr>
-            <% }) %>
         </tbody>
     </table>
 
 </div>
 
-<div class="relatorio-actions">
-
-    <a href="/correias/relatorio/pdf"
-       target="_blank"
-       class="btn btn-verde-escuro">
-       <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+<div class="relatorio-actions" style="margin-top:12px;">
+    <a href="/correias/relatorio/pdf?mes=<%= mes %>" target="_blank" class="btn btn-verde-escuro">
+        <i class="fa-solid fa-file-pdf"></i> Baixar PDF
     </a>
 
-    <a href="/correias" class="btn btn-cinza-escuro">
-        ← Voltar ao Estoque
-    </a>
-
+    <a href="/correias" class="btn btn-cinza-escuro">← Voltar</a>
 </div>
 
 <%- include("./partials/rodape") %>

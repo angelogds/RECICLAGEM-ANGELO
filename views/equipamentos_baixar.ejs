@@ -1,131 +1,46 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-arrow-down"></i> Baixar Correias — <%= equipamento.nome %>
+    <i class="fa-solid fa-arrow-down"></i> Baixa de Correias
 </h1>
 
-<!-- CARD: INFORMAÇÕES DO EQUIPAMENTO -->
-<div class="card" style="
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-    margin-bottom:25px;
-">
-    <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+<div class="card">
 
-        <div style="flex:1;">
-            <p><strong>ID:</strong> <%= equipamento.id %></p>
-            <p><strong>Código:</strong> <%= equipamento.codigo %></p>
-            <p><strong>Local:</strong> <%= equipamento.local %></p>
-        </div>
+    <h2 style="color:#0b5e33; font-weight:800; margin-bottom:18px;">
+        <%= equipamento.nome %>
+    </h2>
 
-        <% if (equipamento.imagem) { %>
-        <div style="width:160px; text-align:center;">
-            <img src="/<%= equipamento.imagem %>"
-                 style="width:140px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
-        </div>
-        <% } %>
+    <form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar-correia" class="form-card">
 
-    </div>
-</div>
-
-<!-- FORMULÁRIO DE BAIXA -->
-<h2 class="page-title" style="font-size:22px; margin-top:10px;">
-    <i class="fa-solid fa-gears"></i> Registrar Baixa de Correia
-</h2>
-
-<div class="card" style="
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-    max-width:600px;
-    margin-bottom:30px;
-">
-
-    <% if (error) { %>
-        <div style="
-            background:#ffdddd;
-            padding:12px;
-            border-left:5px solid #ff4d4d;
-            border-radius:8px;
-            color:#8b0000;
-            margin-bottom:18px;
-        ">
-            <%= error %>
-        </div>
-    <% } %>
-
-    <form method="POST" action="/equipamentos/<%= equipamento.id %>/baixar">
-
-        <label style="font-weight:600;">Correia</label>
-        <select name="correia_id" required
-                style="width:100%; padding:12px; margin-bottom:18px; border:1px solid #d9d9d9; border-radius:8px;">
-            <option value="">Selecione...</option>
+        <label>Selecione a correia</label>
+        <select name="correia_id" required>
+            <option value="">Selecione</option>
             <% correias.forEach(c => { %>
                 <option value="<%= c.id %>">
-                    <%= c.nome %> — <%= c.modelo %> (<%= c.quantidade %> em estoque)
+                    <%= c.nome %> — <%= c.modelo %> — <%= c.medida %> (Estoque: <%= c.quantidade %>)
                 </option>
             <% }) %>
         </select>
 
-        <label style="font-weight:600;">Quantidade</label>
-        <input type="number" name="quantidade" min="1" required
-               style="width:100%; padding:12px; border:1px solid #d9d9d9; border-radius:8px; margin-bottom:20px;">
+        <label>Quantidade usada</label>
+        <input type="number" name="quantidade" min="1" required>
 
-        <button class="btn-primary">
-            <i class="fa-solid fa-save"></i> Registrar Baixa
+        <button class="btn-primary" style="margin-top:18px;">
+            <i class="fa-solid fa-floppy-disk"></i> Registrar Baixa
         </button>
+
     </form>
-</div>
 
-<!-- HISTÓRICO DE BAIXAS -->
-<h2 class="page-title" style="font-size:22px; margin-top:10px;">
-    <i class="fa-solid fa-list"></i> Histórico de Baixas
-</h2>
+    <div class="actions" style="margin-top:25px;">
 
-<div class="card" style="
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 2px 6px #00000015;
-">
+        <a href="/equipamentos/<%= equipamento.id %>" class="btn-edit btn-stack">
+            <i class="fa-solid fa-eye"></i>
+            <span class="btn-label">Ver</span>
+        </a>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Correia</th>
-                <th>Quantidade</th>
-                <th>Data</th>
-            </tr>
-        </thead>
+        <a href="/equipamentos" class="btn-history btn-stack">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="btn-label">Voltar</span>
+        </a>
 
-        <tbody>
-            <% if (historico.length === 0) { %>
-                <tr>
-                    <td colspan="3" style="text-align:center; opacity:0.6; padding:15px;">
-                        Nenhuma baixa registrada ainda.
-                    </td>
-                </tr>
-            <% } %>
-
-            <% historico.forEach(h => { %>
-                <tr>
-                    <td><%= h.correia %></td>
-                    <td>
-                        <span style="
-                            background:#ffb3b3;
-                            padding:6px 10px;
-                            border-radius:6px;
-                            color:#8b0000;
-                            font-weight:600;
-                        ">
-                            -<%= h.quantidade %>
-                        </span>
-                    </td>
-                    <td><%= h.data %></td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
+    </div>
 
 </div>

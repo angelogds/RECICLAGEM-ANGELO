@@ -557,6 +557,64 @@ app.post('/correias/:id/delete', async (req, res) => {
     res.send('Erro ao deletar correia.');
   }
 });
+const PDFDocument = require("pdfkit");
+const ejs = require("ejs");
+const fs = require("fs");
+const path = require("path");
+
+// ----------------------
+// PDF: Relatório Correias
+// ----------------------
+app.get('/correias/relatorio/pdf', authRequired, async (req, res) => {
+  try {
+    const mes = req.query.mes || new Date().toISOString().slice(0, 7);
+
+    const rel = await allAsync(`
+      SELECT e.nome AS equipamento, c.nome AS correia, SUM(cc.quantidade) AS total
+      FROM consumo_correias cc
+      LEFT JOIN equipamentos e ON e.id = cc.equipamento_id
+      LEFT JOIN correias c ON c.id = cc.correia_id
+      WHERE strftime('%Y-%m', cc.data) = ?
+      GROUP BY equipamento, correia
+      ORDER BY equipamento, correia
+    `, [mes]);
+
+    // Renderiza HTML da view PDF
+    const htmlPath = path.join(__dirname, 'views', 'correias_relatorio_pdf.ejs');
+    const html = await ejs.renderFile(htmlPath, { rel, mes });
+
+    // Gera PDF
+    const doc = new PDFDocument({ size: "A4", margin: 28 });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=relatorio_correias.pdf");
+
+    doc.pipe(res);
+
+    doc.fontSize(20).text("Relatório de Consumo de Correias", { align: "center" });
+    doc.moveDown();
+
+    doc.fontSize(12).text(`Mês: ${mes}`);
+    doc.moveDown().moveDown();
+
+    rel.forEach(r => {
+      doc.fontSize(14).text(`Equipamento: ${r.equipamento}`);
+      doc.text(`Correia: ${r.correia}`);
+      doc.text(`Quantidade consumida: ${r.total}`);
+      doc.moveDown();
+    });
+
+    if (rel.length === 0) {
+      doc.fontSize(14).text("Nenhum consumo registrado neste mês.", { align: "center" });
+    }
+
+    doc.end();
+
+  } catch (err) {
+    console.error("PDF ERROR:", err);
+    res.status(500).send("Erro ao gerar PDF.");
+  }
+});
 
 // Associação correias <-> equipamento
 app.get('/equipamentos/:id/correias', authRequired, allowRoles('admin', 'funcionario'), async (req, res) => {

@@ -1,105 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Login • Sistema CDG</title>
+    <title>Login • Campo do Gado</title>
 
-    <link rel="stylesheet" href="/css/style.css" />
-    <link rel="stylesheet" href="/css/style-print.css" media="print" />
-    <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/style.css">
 
     <style>
         body {
-            background: #eef5f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", sans-serif;
+            background: url('/img/login-bg.png') no-repeat center center;
+            background-size: cover;
             height: 100vh;
-            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 32px;
-            border-radius: 18px;
-            box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+        .login-box {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 40px;
+            width: 380px;
+            border-radius: 16px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+            backdrop-filter: blur(6px);
+        }
+
+        .logo-cdg {
             text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1b4d2d;
         }
 
-        .login-title {
-            font-size: 28px;
-            color: var(--green-900);
-            font-weight: 800;
-        }
-
-        .login-sub {
-            margin-top: 4px;
-            font-size: 15px;
-            color: #3a5f46;
+        .login-box label {
+            font-size: 14px;
+            color: #0b2a16;
             font-weight: 600;
         }
 
-        .login-container input {
-            background: #f8fbf9;
-            border-radius: 10px;
-            border: 1px solid #cde3d5;
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            border: 1px solid #8bb79c;
+            background: #f9fff9;
         }
 
-        .login-container button {
-            margin-top: 10px;
-            height: 48px;
-            font-size: 18px;
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #1b4d2d;
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
             border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: #0f331c;
+        }
+
+        .error-box {
+            background: #ffdddd;
+            padding: 10px;
+            color: #a30000;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #ff4d4d;
         }
 
         .forgot-link {
             display: block;
+            text-align: center;
             margin-top: 12px;
-            font-size: 14px;
+            color: #1b4d2d;
             font-weight: 600;
-            text-decoration: underline;
-            color: var(--green-900);
         }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
     </style>
+
 </head>
 
 <body>
 
-<div class="login-container">
+    <div class="login-box">
 
-    <h1 class="login-title">
-        <i class="fa-solid fa-wrench"></i> Sistema CDG
-    </h1>
-    <div class="login-sub">Reciclagem • Manutenção</div>
-
-    <% if (error) { %>
-        <div class="alert-error" style="margin-top:12px;">
-            <%= error %>
+        <div class="logo-cdg">
+            🔧 Sistema CDG<br>
+            <span style="font-size:15px; opacity:0.8;">Reciclagem • Manutenção</span>
         </div>
-    <% } %>
 
-    <form action="/login" method="POST" style="margin-top:22px;">
+        <% if (error) { %>
+            <div class="error-box"><%= error %></div>
+        <% } %>
 
-        <label for="username">Usuário</label>
-        <input id="username" name="username" type="text" required value="<%= username || '' %>" />
+        <form method="POST" action="/login">
+            <label>Usuário</label>
+            <input type="text" name="usuario" required value="<%= typeof usuario !== 'undefined' ? usuario : '' %>">
 
-        <label for="password">Senha</label>
-        <input id="password" name="password" type="password" required />
+            <label>Senha</label>
+            <input type="password" name="senha" required>
 
-        <button class="btn-verde-escuro btn-full">
-            Entrar
-        </button>
+            <button class="btn-login">Entrar</button>
+        </form>
 
-    </form>
-
-    <a class="forgot-link" href="/forgot">Esqueci minha senha</a>
-
-</div>
+        <a href="/forgot" class="forgot-link">Esqueci minha senha</a>
+    </div>
 
 </body>
 </html>

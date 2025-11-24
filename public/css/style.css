@@ -327,3 +327,44 @@ td img {
     gap: 10px;
     justify-content: center;
 }
+/* ===== TABELAS PADRÃO (versão antiga/restaurada) ===== */
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tabela th {
+    background: #e9f5ee;
+    font-weight: 700;
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #0d4d2c;
+}
+
+.tabela td {
+    padding: 10px 14px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.tabela tr:nth-child(even) {
+    background: #f8fdf9;
+}
+
+.tabela tr:hover {
+    background: #eefaf2;
+}
+
+/* CELULA DA FOTO */
+.thumb {
+    width: 90px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #d0ead9;
+}

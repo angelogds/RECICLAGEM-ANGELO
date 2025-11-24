@@ -25,7 +25,7 @@
 
         <div class="grupo">
             <label>Localização</label>
-            <input type="text" name="localizacao">
+            <input type="text" name="local">
         </div>
 
         <div class="grupo">
@@ -38,21 +38,22 @@
             <textarea name="descricao" rows="4"></textarea>
         </div>
 
-       <div class="grupo">
-    <label>Foto (opcional)</label>
-    <input type="file" name="imagem" accept="image/*">
-</div>
+        <div class="grupo">
+            <label>Foto do Equipamento</label>
+            <!-- 🔥 CORRETO PARA MULTER -->
+            <input type="file" name="imagem" accept="image/*">
+        </div>
 
-
-        <button class="btn btn-verde-claro btn-full" type="submit">
-            <i class="fa-solid fa-floppy-disk"></i>
-            Salvar Equipamento
+        <button class="btn btn-verde-claro btn-full">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar Equipamento
         </button>
 
     </form>
 
 </div>
 
-<a href="/equipamentos" class="btn btn-cinza-escuro">← Voltar</a>
+<a href="/equipamentos" class="btn btn-cinza-escuro">
+    ← Voltar
+</a>
 
 <%- include("./partials/rodape") %>

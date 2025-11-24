@@ -1,6 +1,6 @@
-/* ===========================
-   RESET & BASE
-=========================== */
+/* =========================================================
+   RESET / BASE
+=========================================================*/
 * {
     margin: 0;
     padding: 0;
@@ -9,70 +9,68 @@
 
 html, body {
     width: 100%;
-    max-width: 100%;
+    height: 100%;
     overflow-x: hidden;
     font-family: "Inter", sans-serif;
     background: #f3f7f4;
 }
 
-/* ===========================
-   BOTÃO FLOTANTE (MENU)
-=========================== */
+/* =========================================================
+   BOTÃO REDONDO (MENU)
+=========================================================*/
 .menu-toggle {
     position: fixed;
-    top: 18px;
-    left: 18px;
+    top: 15px;
+    left: 15px;
     z-index: 2000;
     background: #0d542c;
     border: none;
     width: 62px;
     height: 62px;
     border-radius: 50%;
-    padding: 6px;
+    padding: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-    transition: 0.25s;
+    box-shadow: 0 4px 12px #00000033;
+    transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .menu-toggle:hover {
-    transform: scale(1.05);
+    box-shadow: 0 6px 18px #00000044;
 }
 
-.menu-logo-icon {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
+.menu-toggle img {
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
 }
 
-/* ===========================
+/* =========================================================
    SIDEBAR
-=========================== */
+=========================================================*/
 .sidebar {
     position: fixed;
     top: 0;
-    left: -290px;
-    width: 270px;
+    left: -260px;
+    width: 250px;
     height: 100vh;
     background: #0d542c;
-    padding: 28px 20px;
+    padding: 30px 20px;
     color: white;
+    border-radius: 0 20px 20px 0;
+    z-index: 1500;
     transition: left .35s ease;
-    border-radius: 0 18px 18px 0;
-    z-index: 1800;
 }
 
 .sidebar.open {
     left: 0;
 }
 
-/* Logo dentro do menu */
 .logo-area {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .logo-area .logo {
@@ -80,47 +78,42 @@ html, body {
     margin-bottom: 10px;
 }
 
-.sidebar h2 {
-    font-size: 20px;
-    font-weight: 700;
-}
-
-/* LISTA DO MENU */
 .sidebar ul {
     list-style: none;
 }
 
 .sidebar ul li {
-    margin: 12px 0;
+    margin-bottom: 15px;
 }
 
 .sidebar ul li a {
-    color: #e3f7ea;
+    color: #e9fff0;
     text-decoration: none;
-    font-size: 16px;
     display: block;
-    padding: 10px 12px;
-    border-radius: 8px;
+    background: #0e6a39;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 600;
     transition: .2s;
 }
 
-.sidebar ul li a.active,
-.sidebar ul li a:hover {
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
     background: #0a4727;
     color: #fff;
 }
 
-/* ===========================
-   MAIN CONTENT
-=========================== */
+/* =========================================================
+   ÁREA PRINCIPAL
+=========================================================*/
 .main-content {
-    padding: 40px;
+    padding: 40px 35px;
     margin-left: 0;
-    transition: margin-left .3s ease;
+    transition: .3s;
 }
 
 .main-content.menu-open {
-    margin-left: 270px;
+    margin-left: 250px;
 }
 
 @media (max-width: 900px) {
@@ -129,48 +122,54 @@ html, body {
     }
 }
 
-/* ===========================
-   TÍTULOS
-=========================== */
+/* =========================================================
+   TITULOS
+=========================================================*/
 .page-title {
     font-size: 26px;
     font-weight: 700;
     color: #0b2a16;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
-/* ===========================
-   BOTÕES PRINCIPAIS
-=========================== */
-.btn-primary,
-.btn-save,
-.btn-add {
+/* =========================================================
+   BOTÕES PADRÃO
+=========================================================*/
+.btn-primary {
     background: #1b7f42;
-    padding: 12px 18px;
-    border: none;
+    color: white;
+    padding: 10px 18px;
     border-radius: 10px;
-    color: #fff;
-    font-size: 15px;
     font-weight: 600;
+    border: none;
     cursor: pointer;
     text-decoration: none;
-    display: inline-block;
+    font-size: 14px;
     transition: .2s;
 }
 
-.btn-primary:hover,
-.btn-save:hover,
-.btn-add:hover {
+.btn-primary:hover {
     background: #155f32;
 }
 
-/* ===========================
+.btn-danger {
+    background: #c62828;
+    padding: 10px 18px;
+    border-radius: 10px;
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: #b71c1c;
+}
+
+/* =========================================================
    TABELA MODERNA
-=========================== */
+=========================================================*/
 .table-modern {
     width: 100%;
     border-collapse: collapse;
-    overflow: hidden;
 }
 
 .table-modern thead {
@@ -180,142 +179,124 @@ html, body {
 
 .table-modern th,
 .table-modern td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eaeaea;
+    padding: 14px;
+    border-bottom: 1px solid #e7e7e7;
 }
 
 .table-modern tbody tr:hover {
-    background: #eaf5ee;
+    background: #effaf1;
 }
 
+/* Coluna vazia */
 .empty {
     text-align: center;
     padding: 20px;
+    font-size: 14px;
     color: #777;
 }
 
-/* RESPONSIVO — tabela vira scroll */
-@media (max-width: 700px) {
-    .table-modern {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-}
-
-/* ===========================
-   IMAGENS DOS EQUIPAMENTOS
-=========================== */
-.thumb {
-    width: 80px;
-    height: 65px;
-    border-radius: 8px;
-    border: 3px solid #0b5e33;
-    object-fit: cover;
-}
-
-/* ===========================
-   CARDS
-=========================== */
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
-}
-
-/* ===========================
-   FORMULÁRIOS
-=========================== */
-.form-card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-}
-
-label {
-    font-weight: 600;
-    color: #124d2b;
-    margin-bottom: 5px;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #cfe4d6;
-    background: #f5fff7;
-    margin-bottom: 12px;
-}
-
-/* ===========================
-   BOTÕES DE AÇÃO (Ícone + texto)
-=========================== */
-
+/* =========================================================
+   BOTÕES DE AÇÃO (Equipamentos / OS / etc.)
+=========================================================*/
 .actions {
     display: flex;
-    gap: 18px;
+    gap: 14px;
     justify-content: center;
-    flex-wrap: wrap;
+    align-items: center;
 }
 
 .btn-action {
-    width: 70px;
-    height: 70px;
-    background: #1b7f42;
-    border-radius: 12px;
-    color: white;
-    text-align: center;
-    padding: 8px 6px;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
+    width: 42px;
+    height: 42px;
+    background: #155f32;
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 4px;
-    font-size: 13px;
+    cursor: pointer;
+    color: white;
+    border: none;
     transition: .2s;
 }
 
-.btn-action i {
-    font-size: 20px;
+.btn-action:hover {
+    opacity: .8;
 }
 
-.btn-action span {
+.btn-label {
     font-size: 11px;
+    color: #0b2a16;
+    margin-top: 4px;
+    text-align: center;
+}
+
+/* =========================================================
+   IMAGENS DE EQUIPAMENTO
+=========================================================*/
+.thumb {
+    width: 85px;
+    height: 65px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #0f5132;
+}
+
+/* =========================================================
+   FORMULÁRIOS
+=========================================================*/
+.form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px #00000010;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #d6e8dd;
+    background: #f7fff9;
+    margin-bottom: 12px;
+}
+
+/* =========================================================
+   TAGS DE STATUS
+=========================================================*/
+.tag {
+    padding: 5px 8px;
+    border-radius: 8px;
+    color: white;
+    font-size: 12px;
     font-weight: 600;
 }
 
-.btn-action:hover {
-    opacity: .85;
-    transform: translateY(-3px);
+.tag.green {
+    background: #15803d;
 }
 
-/* Cores */
-.btn-edit { background: #198754; }
-.btn-qr { background: #0d6efd; }
-.btn-history { background: #6c757d; }
-.btn-delete { background: #dc3545; }
+.tag.yellow {
+    background: #eab308;
+    color: #473800;
+}
 
-/* ===========================
-   GALERIA DE FOTOS
-=========================== */
+/* =========================================================
+   GALERIA (OS)
+=========================================================*/
 .galeria {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
 }
 
 .foto-item {
-    background: #fff;
-    padding: 8px;
+    background: white;
     border-radius: 10px;
+    padding: 8px;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px #00000020;
 }
 
 .foto-item img {
@@ -324,44 +305,34 @@ input, select, textarea {
     cursor: pointer;
     transition: .2s;
 }
-
 .foto-item img:hover {
     transform: scale(1.05);
 }
 
-.foto-legenda {
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 4px;
-    color: #245a32;
+.btn-delete-foto {
+    background: #c62828;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    margin-top: 6px;
 }
 
-/* ===========================
-   MODAL ZOOM
-=========================== */
-.zoom-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+/* =========================================================
+   LOGIN (mantido)
+=========================================================*/
+.login-box {
+    background: rgba(255,255,255,0.92);
+    padding: 40px;
+    width: 380px;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px #00000025;
 }
 
-.zoom-modal img {
-    max-width: 90%;
-    max-height: 90%;
-    border-radius: 10px;
-}
-
-/* ===========================
-   MOBILE
-=========================== */
-@media (max-width: 600px) {
-    .page-title { font-size: 22px; }
-    .btn-action { width: 65px; height: 65px; }
-    .form-card { padding: 18px; }
+.error-box {
+    background: #ffdddd;
+    padding: 10px;
+    color: #a30000;
+    margin-bottom: 14px;
+    border-radius: 8px;
 }

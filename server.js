@@ -816,13 +816,13 @@ app.get('/ordens', async (req, res) => {
 app.get('/ordens/novo', async (req, res) => {
   try {
     const equipamentos = await allAsync(`SELECT id, nome FROM equipamentos ORDER BY nome ASC`);
-    res.render('abrir_os', { equipamentos, active: 'os_nova
-' });
+    res.render('os_nova', { equipamentos, active: 'ordens' });
   } catch (err) {
     console.error(err);
     res.send('Erro ao abrir formulário de OS.');
   }
 });
+
 
 // -------------------------------------------------------
 // CRIAR OS (com fotos de abertura)

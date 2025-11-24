@@ -1,76 +1,102 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-gears"></i> Correias do Equipamento
+    <i class="fa-solid fa-gears"></i>
+    Correias do Equipamento
 </h1>
 
-<div class="card">
+<div class="card" style="padding:25px;">
 
-    <h2 style="color:#0b5e33; font-weight:800; margin-bottom:18px;">
+    <h2 style="color:#0b5e33; font-size:22px; font-weight:800; margin-bottom:20px;">
         <%= equipamento.nome %>
     </h2>
 
-    <form method="POST" class="form-card">
-
-        <p style="margin-bottom:20px; opacity:0.8;">
-            Selecione as correias usadas e defina a quantidade aplicada neste equipamento.
-        </p>
+    <form method="POST" action="/equipamentos/<%= equipamento.id %>/correias">
 
         <table class="table-modern">
             <thead>
                 <tr>
+                    <th style="width:60px;">Usa?</th>
                     <th>Correia</th>
                     <th>Modelo</th>
                     <th>Medida</th>
-                    <th>Qtd</th>
-                    <th>Usar</th>
+                    <th style="width:120px;">Quantidade</th>
                 </tr>
             </thead>
 
             <tbody>
+
                 <% correias.forEach(c => { %>
                     <tr>
-                        <td><%= c.nome %></td>
-                        <td><%= c.modelo %></td>
-                        <td><%= c.medida %></td>
 
-                        <td style="max-width:75px;">
-                            <input type="number"
-                                   name="qtd_<%= c.id %>"
-                                   value="<%= mapLigados[c.id] || 0 %>"
-                                   min="0"
-                                   style="width:80px;">
-                        </td>
-
-                        <td class="center">
+                        <!-- Checkbox -->
+                        <td style="text-align:center;">
                             <input type="checkbox"
                                    name="correia"
                                    value="<%= c.id %>"
-                                   <%= mapLigados[c.id] ? "checked" : "" %> >
+                                   <%= mapLigados[c.id] ? 'checked' : '' %>
+                                   style="width:20px; height:20px;">
                         </td>
+
+                        <!-- Nome -->
+                        <td><%= c.nome %></td>
+
+                        <!-- Modelo -->
+                        <td><%= c.modelo %></td>
+
+                        <!-- Medida -->
+                        <td><%= c.medida %></td>
+
+                        <!-- Quantidade usada -->
+                        <td>
+                            <input type="number"
+                                   name="qtd_<%= c.id %>"
+                                   min="1"
+                                   value="<%= mapLigados[c.id] || 1 %>"
+                                   style="width:80px; text-align:center;">
+                        </td>
+
                     </tr>
                 <% }) %>
+
             </tbody>
         </table>
 
-        <div style="text-align:center; margin-top:25px;">
-            <button class="btn-primary" style="padding:14px 26px;">
-                <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+        <div style="margin-top:25px; display:flex; gap:14px; justify-content:flex-start; flex-wrap:wrap;">
+
+            <button class="btn-primary btn-stack" style="width:95px; height:95px;">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span class="btn-label">Salvar</span>
             </button>
+
+            <a href="/equipamentos/<%= equipamento.id %>"
+               class="btn-history btn-stack"
+               style="background:#6c757d; width:95px; height:95px;">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="btn-label">Voltar</span>
+            </a>
+
+            <a href="/equipamentos/<%= equipamento.id %>/historico"
+               class="btn-history btn-stack"
+               style="width:95px; height:95px;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span class="btn-label">Histórico</span>
+            </a>
+
+            <a href="/equipamentos/<%= equipamento.id %>/qrcode"
+               class="btn-qr btn-stack"
+               style="width:95px; height:95px;">
+                <i class="fa-solid fa-qrcode"></i>
+                <span class="btn-label">QR Code</span>
+            </a>
+
+            <a href="/equipamentos/<%= equipamento.id %>/editar"
+               class="btn-edit btn-stack"
+               style="width:95px; height:95px;">
+                <i class="fa-solid fa-pen"></i>
+                <span class="btn-label">Editar</span>
+            </a>
+
         </div>
 
     </form>
-
-    <div class="actions" style="margin-top:25px;">
-
-        <a href="/equipamentos/<%= equipamento.id %>" class="btn-edit btn-stack">
-            <i class="fa-solid fa-eye"></i>
-            <span class="btn-label">Ver</span>
-        </a>
-
-        <a href="/equipamentos" class="btn-history btn-stack">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span class="btn-label">Voltar</span>
-        </a>
-
-    </div>
 
 </div>

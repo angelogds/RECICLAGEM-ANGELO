@@ -203,3 +203,68 @@ html,body{
   .actions i{font-size:15px}
   .btn-label{font-size:9px}
 }
+/* ============================
+   RESTAURAR LAYOUT DA TABELA
+   ============================ */
+
+/* Deixar largura igual novamente */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Cabeçalho da tabela */
+.table thead tr th {
+    background: #dff3e8 !important;
+    color: #0b3d27;
+    padding: 14px;
+    font-size: 15px;
+    text-align: left;
+}
+
+/* Células */
+.table tbody td {
+    padding: 16px 14px;
+    vertical-align: middle;
+    font-size: 15px;
+}
+
+/* Linha */
+.table tbody tr {
+    border-bottom: 1px solid #e8f2eb;
+}
+
+/* Miniatura */
+.table img.thumb {
+    width: 80px !important;
+    height: 65px !important;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #0f5132;
+}
+
+/* Coluna das ações — alinha em linha, como estava antes */
+.table td .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    justify-content: flex-start !important;
+}
+
+/* Botões menores */
+.actions a, 
+.actions button {
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Ícones */
+.actions i {
+    font-size: 15px !important;
+}
+
+/* Nome dos botões */
+.btn-label {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+}

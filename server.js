@@ -1073,17 +1073,18 @@ app.get('/', authRequired, async (req, res) => {
       ORDER BY mes ASC
     `);
 
-    res.render('admin/dashboard', {
-      active: 'dashboard',
-      totais: {
-        equipamentos: totalEquip?.c || 0,
-        abertas: totalAbertas?.c || 0,
-        fechadas: totalFechadas?.c || 0
-      },
-      tipos,
-      porMes,
-      ultimas
-    });
+    res.render('dashboard', {
+  active: 'dashboard',
+  totais: {
+    equipamentos: totalEquip?.c || 0,
+    abertas: totalAbertas?.c || 0,
+    fechadas: totalFechadas?.c || 0
+  },
+  tipos,
+  porMes,
+  ultimas
+});
+
 
   } catch (err) {
     console.error(err);

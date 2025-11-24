@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Relatório de Equipamentos</title>
+<style>
+    body { font-family: Arial, sans-serif; font-size:12px; margin:20px; color:#222; }
+    h1 { text-align:center; color:#0D6B33; margin-bottom:6px; font-size:18px; }
+    .sub { text-align:center; font-size:11px; color:#555; margin-bottom:16px; }
+    table { width:100%; border-collapse:collapse; font-size:11px; }
+    th { background:#0D6B33; color:#fff; padding:8px; border:1px solid #ccc; font-weight:700; }
+    td { padding:7px; border:1px solid #ddd; vertical-align:top; }
+    .center { text-align:center; }
+    .footer { margin-top:20px; text-align:center; font-size:10px; color:#777; }
+</style>
+</head>
+<body>
+
+<% if (logo) { %>
+    <div style="text-align:center; margin-bottom:10px;">
+        <img src="<%= logo %>" style="width:80px;">
+    </div>
+<% } %>
+
+<h1>Relatório de Equipamentos</h1>
+<div class="sub">Gerado em <%= dataGeracao %> — Total: <%= equipamentos.length %></div>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width:45px;">ID</th>
+            <th>Nome</th>
+            <th>Modelo</th>
+            <th>Localização</th>
+            <th>Código</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (equipamentos.length === 0) { %>
+            <tr><td colspan="5" class="center">Nenhum equipamento cadastrado.</td></tr>
+        <% } %>
+
+        <% equipamentos.forEach(eq => { %>
+            <tr>
+                <td class="center"><%= eq.id %></td>
+                <td><%= eq.nome %></td>
+                <td><%= eq.modelo || '-' %></td>
+                <td><%= eq.localizacao || '-' %></td>
+                <td><%= eq.codigo || '-' %></td>
+            </tr>
+        <% }) %>
+    </tbody>
+</table>
+
+<div class="footer">Campo do Gado — Sistema de Manutenção</div>
+</body>
+</html>

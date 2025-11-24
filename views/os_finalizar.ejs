@@ -1,39 +1,44 @@
+<%- include("./partials/cabecalho") %>
+
 <h1 class="page-title">
-    <i class="fa-solid fa-lock"></i>
-    Finalizar Ordem de Serviço #<%= os.id %>
+    <i class="fa-solid fa-check-circle"></i>
+    Finalizar OS
 </h1>
 
 <div class="card form-card">
 
-    <h3 style="margin-bottom:10px;">Resumo da OS</h3>
+    <h2 style="margin-bottom:10px; color:var(--green-900);">
+        OS #<%= os.id %> — <%= os.equipamento_nome %>
+    </h2>
 
-    <p><strong>Equipamento:</strong> <%= equipamento.nome %></p>
-    <p><strong>Tipo:</strong> <%= os.tipo %></p>
-    <p><strong>Status atual:</strong> 
-        <span class="tag green"><%= os.status %></span>
-    </p>
-    <p><strong>Aberta em:</strong> <%= os.aberta_em %></p>
+    <p><strong>Descrição:</strong> <%= os.descricao %></p>
 
-    <hr style="margin:18px 0; opacity:0.3;">
+    <% if (os.status !== "Fechada") { %>
 
-    <h3 style="margin-bottom:12px;">Deseja realmente finalizar esta OS?</h3>
+    <form action="/os/<%= os.id %>/finalizar" method="POST" class="formulario">
 
-    <p style="margin-bottom:20px; opacity:0.8;">
-        Depois de encerrada, a OS será marcada como <strong>fechada</strong> permanentemente
-        e registrada no histórico do equipamento.
-    </p>
+        <div class="grupo">
+            <label>Observação do Técnico</label>
+            <textarea name="obs_final" rows="4" required></textarea>
+        </div>
 
-    <form method="POST" action="/os/<%= os.id %>/finalizar">
-
-        <button class="btn-primary" style="width:100%; padding:14px; margin-bottom:12px;">
-            <i class="fa-solid fa-check"></i> Confirmar Encerramento
+        <button class="btn btn-verde-claro btn-full">
+            <i class="fa-solid fa-check"></i> Finalizar OS
         </button>
-
     </form>
 
-    <a href="/os/<%= os.id %>" class="btn-delete" 
-       style="display:block; text-align:center; padding:12px; width:100%; text-decoration:none;">
-        <i class="fa-solid fa-xmark"></i> Cancelar
-    </a>
+    <% } else { %>
+
+        <div class="alert-error" style="margin-top:16px;">
+            Essa OS já está finalizada.
+        </div>
+
+    <% } %>
 
 </div>
+
+<a href="/ordens" class="btn btn-cinza-escuro">
+    ← Voltar
+</a>
+
+<%- include("./partials/rodape") %>

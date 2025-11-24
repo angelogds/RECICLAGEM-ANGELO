@@ -1,132 +1,59 @@
+<%- include("./partials/cabecalho") %>
+
 <h1 class="page-title">
     <i class="fa-solid fa-clock-rotate-left"></i>
     Histórico do Equipamento
 </h1>
 
-<div class="card" style="padding:25px;">
-
-    <!-- Nome do equipamento -->
-    <h2 style="color:#0b5e33; font-size:22px; font-weight:800; margin-bottom:20px;">
+<div class="card">
+    <h2 style="color:var(--green-900); margin-bottom:10px;">
         <%= equipamento.nome %>
     </h2>
 
-    <!-- BOTÕES SUPERIORES -->
-    <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:25px;">
+    <p><strong>Modelo:</strong> <%= equipamento.modelo || '-' %></p>
+    <p><strong>Localização:</strong> <%= equipamento.localizacao || '-' %></p>
+    <p><strong>Código:</strong> <%= equipamento.codigo || '-' %></p>
+</div>
 
-        <a href="/equipamentos/<%= equipamento.id %>"
-           class="btn-history btn-stack"
-           style="background:#6c757d; width:95px; height:95px;">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span class="btn-label">Voltar</span>
-        </a>
+<div class="card tabela-card">
 
-        <a href="/equipamentos/<%= equipamento.id %>/editar"
-           class="btn-edit btn-stack"
-           style="width:95px; height:95px;">
-            <i class="fa-solid fa-pen"></i>
-            <span class="btn-label">Editar</span>
-        </a>
-
-        <a href="/equipamentos/<%= equipamento.id %>/qrcode"
-           class="btn-qr btn-stack"
-           style="width:95px; height:95px;">
-            <i class="fa-solid fa-qrcode"></i>
-            <span class="btn-label">QR Code</span>
-        </a>
-
-        <a href="/equipamentos/<%= equipamento.id %>/correias"
-           class="btn-correias btn-stack"
-           style="width:95px; height:95px;">
-            <i class="fa-solid fa-gears"></i>
-            <span class="btn-label" style="color:#054a29;">Correias</span>
-        </a>
-
-    </div>
-
-
-    <!-- ============================================= -->
-    <!-- HISTÓRICO DE ORDENS DE SERVIÇO -->
-    <!-- ============================================= -->
-
-    <h3 style="margin:20px 0 10px; color:#124d2b; font-weight:800;">
-        <i class="fa-solid fa-list-check"></i> Ordens de Serviço
-    </h3>
-
-    <table class="table-modern">
+    <table class="tabela">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Abertura</th>
-                <th>Fechamento</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <% if (ordens.length === 0) { %>
-                <tr>
-                    <td colspan="5" class="empty">Nenhuma ordem registrada.</td>
-                </tr>
-            <% } else { %>
-
-                <% ordens.forEach(o => { %>
-                    <tr>
-                        <td><%= o.id %></td>
-                        <td><%= o.tipo %></td>
-
-                        <td>
-                            <% if (o.status === 'aberta') { %>
-                                <span class="tag warn">Aberta</span>
-                            <% } else { %>
-                                <span class="tag green">Fechada</span>
-                            <% } %>
-                        </td>
-
-                        <td><%= o.aberta_em %></td>
-                        <td><%= o.fechada_em || '-' %></td>
-                    </tr>
-                <% }) %>
-
-            <% } %>
-        </tbody>
-    </table>
-
-
-    <!-- ============================================= -->
-    <!-- HISTÓRICO DE CONSUMO DE CORREIAS -->
-    <!-- ============================================= -->
-
-    <h3 style="margin:30px 0 10px; color:#124d2b; font-weight:800;">
-        <i class="fa-solid fa-gears"></i> Correias Consumidas
-    </h3>
-
-    <table class="table-modern">
-        <thead>
-            <tr>
-                <th>Correia</th>
-                <th>Quantidade</th>
+                <th>Serviço</th>
+                <th>Técnico</th>
                 <th>Data</th>
+                <th>Descrição</th>
             </tr>
         </thead>
 
         <tbody>
-            <% if (correias.length === 0) { %>
-                <tr>
-                    <td colspan="3" class="empty">Nenhum consumo registrado.</td>
-                </tr>
-            <% } else { %>
 
-                <% correias.forEach(c => { %>
-                    <tr>
-                        <td><%= c.correia %></td>
-                        <td><strong><%= c.quantidade %></strong></td>
-                        <td><%= c.data %></td>
-                    </tr>
-                <% }) %>
-
+            <% if (historico.length === 0) { %>
+            <tr>
+                <td colspan="5" class="empty">Nenhum histórico registrado.</td>
+            </tr>
             <% } %>
+
+            <% historico.forEach(h => { %>
+            <tr>
+                <td><%= h.id %></td>
+                <td><%= h.tipo_servico %></td>
+                <td><%= h.tecnico || '-' %></td>
+                <td><%= h.data_servico %></td>
+                <td><%= h.descricao %></td>
+            </tr>
+            <% }) %>
+
         </tbody>
     </table>
 
 </div>
+
+<a href="/equipamentos/<%= equipamento.id %>" class="btn btn-cinza-escuro">
+    ← Voltar
+</a>
+
+<%- include("./partials/rodape") %>
+

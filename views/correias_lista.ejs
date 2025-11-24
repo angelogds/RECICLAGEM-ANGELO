@@ -1,0 +1,81 @@
+<%- include("../partials/cabecalho") %>
+
+<h1 class="page-title">
+    <i class="fa-solid fa-gears"></i>
+    Correias / Estoque
+</h1>
+
+<div class="top-actions">
+    <a href="/correias/novo" class="btn btn-verde-claro">
+        <i class="fa-solid fa-plus"></i> Nova Correia
+    </a>
+</div>
+
+<div class="card tabela-card">
+
+    <table class="tabela">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Modelo</th>
+                <th>Medida</th>
+                <th>Quantidade</th>
+                <th style="text-align:center;">Ações</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <% if (correias.length === 0) { %>
+                <tr>
+                    <td colspan="6" class="empty">Nenhuma correia cadastrada.</td>
+                </tr>
+            <% } %>
+
+            <% correias.forEach(c => { %>
+            <tr>
+                <td><%= c.id %></td>
+                <td><%= c.nome %></td>
+                <td><%= c.modelo %></td>
+                <td><%= c.medida %></td>
+
+                <td>
+                    <span class="tag verde-escuro">
+                        <%= c.quantidade %>
+                    </span>
+                </td>
+
+                <td class="acoes">
+
+                    <a href="/correias/<%= c.id %>/editar"
+                       class="btn-mini verde-claro">
+                        <i class="fa-solid fa-pen"></i>
+                    </a>
+
+                    <form method="POST"
+                          action="/correias/<%= c.id %>/delete"
+                          onsubmit="return confirm('Excluir correia?');">
+                        <button class="btn-mini vermelho">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+
+                </td>
+            </tr>
+            <% }) %>
+
+        </tbody>
+    </table>
+
+</div>
+
+<div class="pdf-box">
+    <a href="/correias/relatorio/pdf"
+       target="_blank"
+       class="btn btn-verde-escuro">
+        <i class="fa-solid fa-file-pdf"></i> Baixar PDF Completo
+    </a>
+</div>
+
+<%- include("../partials/rodape") %>

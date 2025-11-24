@@ -1,92 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== "undefined" ? title : "Campo do Gado" %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style-print.css" media="print">
+  <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
 
-    <title><%= typeof title !== "undefined" ? title : "Campo do Gado" %></title>
-
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/style-print.css" media="print">
-
-    <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
-
-    <% if (typeof chartjs !== "undefined" && chartjs === true) { %>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <% } %>
+  <% if (typeof chartjs !== "undefined" && chartjs === true) { %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <% } %>
 </head>
-
 <body>
 
-    <!-- BOTÃO DO MENU -->
-    <button id="menuToggle" class="menu-toggle smooth">
-        <img 
-            src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
-            class="menu-logo-icon"
-            onerror="this.src='/img/logo_menu_256.png'">
-    </button>
+  <!-- BOTÃO DO MENU -->
+  <button id="menuToggle" class="menu-toggle smooth">
+    <img 
+      src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
+      class="menu-logo-icon"
+      onerror="this.src='/img/logo_menu_256.png'">
+  </button>
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar smooth">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar smooth">
+    <div class="logo-area">
+      <img 
+        src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
+        class="logo"
+        onerror="this.src='/img/logo_menu_256.png'">
+      <h2>Campo do Gado</h2>
+    </div>
 
-        <div class="logo-area">
-            <img 
-                src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
-                class="logo"
-                onerror="this.src='/img/logo_menu_256.png'">
-            <h2>Campo do Gado</h2>
+    <ul class="menu">
+      <li><a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+      <% if (session && (session.role === 'admin' || session.role === 'funcionario')) { %>
+        <li><a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>"><i class="fa-solid fa-truck"></i> Equipamentos</a></li>
+        <li><a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>"><i class="fa-solid fa-gears"></i> Correias / Estoque</a></li>
+      <% } %>
+      <li><a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>"><i class="fa-solid fa-list-check"></i> Ordens</a></li>
+      <% if (session && session.role === 'admin') { %>
+        <li><a href="/users" class="<%= active === 'users' ? 'active' : '' %>"><i class="fa-solid fa-users"></i> Usuários</a></li>
+      <% } %>
+      <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
+    </ul>
+  </aside>
+
+  <!-- TOPBAR ÚNICA -->
+  <header class="top-bar smooth">
+    <div class="top-title" style="margin:0 auto; text-align:center; font-weight:800;">Campo do Gado</div>
+
+    <div class="top-bar-right">
+      <% if (session?.usuario) { %>
+        <div class="user-box">
+          <i class="fa-solid fa-user"></i>
+          <span><%= session.usuario %></span>
         </div>
+        <a href="/logout" class="btn btn-verde-claro"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+      <% } else { %>
+        <a href="/login" class="btn btn-verde-claro"><i class="fa-solid fa-right-to-bracket"></i> Entrar</a>
+      <% } %>
+    </div>
+  </header>
 
-        <ul class="menu">
+  <!-- CONTEÚDO -->
+  <main id="mainContent" class="main-content smooth">
+    <%- body %>
+  </main>
 
-            <li><a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">
-                <i class="fa-solid fa-chart-line"></i> Dashboard
-            </a></li>
-
-            <% if (session && (session.role === 'admin' || session.role === 'funcionario')) { %>
-
-            <li><a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>">
-                <i class="fa-solid fa-truck"></i> Equipamentos
-            </a></li>
-
-            <li><a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>">
-                <i class="fa-solid fa-gears"></i> Correias / Estoque
-            </a></li>
-
-            <% } %>
-
-            <li><a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>">
-                <i class="fa-solid fa-list-check"></i> Ordens
-            </a></li>
-
-            <% if (session && session.role === 'admin') { %>
-            <li><a href="/users" class="<%= active === 'users' ? 'active' : '' %>">
-                <i class="fa-solid fa-users"></i> Usuários
-            </a></li>
-            <% } %>
-
-            <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-
-        </ul>
-    </aside>
-
-   
-    <!-- CONTEÚDO -->
-    <main id="mainContent" class="main-content smooth">
-        <%- body %>
-    </main>
-
-    <script>
-        const btn = document.getElementById("menuToggle");
-        const sidebar = document.getElementById("sidebar");
-        const content = document.getElementById("mainContent");
-
-        btn.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-            content.classList.toggle("menu-open");
-        });
-    </script>
-
+  <script>
+    const btn = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+    const content = document.getElementById("mainContent");
+    btn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      content.classList.toggle("menu-open");
+    });
+  </script>
 </body>
 </html>

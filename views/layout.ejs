@@ -71,35 +71,7 @@
         </ul>
     </aside>
 
-    <!-- TOPBAR ÚNICA -->
-    <header class="top-bar smooth">
-
-        <div class="top-title" style="margin: 0 auto;">
-            Campo do Gado
-        </div>
-
-        <div class="top-bar-right">
-            <% if (session?.usuario) { %>
-
-                <div class="user-box">
-                    <i class="fa-solid fa-user"></i>
-                    <span><%= session.usuario %></span>
-                </div>
-
-                <a href="/logout" class="btn btn-verde-claro">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </a>
-
-            <% } else { %>
-
-                <a href="/login" class="btn btn-verde-claro">
-                    <i class="fa-solid fa-right-to-bracket"></i> Entrar
-                </a>
-
-            <% } %>
-        </div>
-    </header>
-
+   
     <!-- CONTEÚDO -->
     <main id="mainContent" class="main-content smooth">
         <%- body %>

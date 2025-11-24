@@ -1,14 +1,16 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-gears"></i> Correias / Estoque
+    <i class="fa-solid fa-gears"></i>
+    Correias / Estoque
 </h1>
 
-<div style="margin-bottom: 25px;">
+<div style="margin-bottom: 22px;">
     <a href="/correias/novo" class="btn-primary">
         <i class="fa-solid fa-plus"></i> Nova Correia
     </a>
 </div>
 
-<div class="card">
+<div class="card" style="overflow-x:auto;">
+
     <table class="table-modern">
         <thead>
             <tr>
@@ -16,7 +18,7 @@
                 <th>Nome</th>
                 <th>Modelo</th>
                 <th>Medida</th>
-                <th>Quantidade</th>
+                <th>Qtd</th>
                 <th style="text-align:center;">Ações</th>
             </tr>
         </thead>
@@ -24,53 +26,57 @@
         <tbody>
 
             <% if (correias.length === 0) { %>
-                <tr>
-                    <td colspan="6" class="empty">Nenhuma correia cadastrada.</td>
-                </tr>
+            <tr>
+                <td colspan="6" class="empty">
+                    Nenhuma correia cadastrada.
+                </td>
+            </tr>
             <% } %>
 
             <% correias.forEach(c => { %>
-                <tr>
-                    <td><%= c.id %></td>
-                    <td><%= c.nome %></td>
-                    <td><%= c.modelo %></td>
-                    <td><%= c.medida %></td>
-                    <td>
-                        <span class="<%= c.quantidade <= 0 ? 'status-danger' : 'status-ok' %>">
-                            <%= c.quantidade %>
-                        </span>
-                    </td>
+            <tr>
+                <td><%= c.id %></td>
+                <td><%= c.nome %></td>
+                <td><%= c.modelo %></td>
+                <td><%= c.medida %></td>
 
-                    <td class="actions">
+                <td>
+                    <span class="tag green" style="font-size: 14px;">
+                        <%= c.quantidade %>
+                    </span>
+                </td>
 
-                        <!-- EDITAR -->
+                <td class="center">
+                    <div class="actions">
+
                         <a href="/correias/<%= c.id %>/editar"
-                           class="btn-edit btn-stack"
-                           style="width:85px; height:85px;">
+                           class="btn-edit">
                             <i class="fa-solid fa-pen"></i>
                             <span class="btn-label">Editar</span>
                         </a>
-<a href="/correias/relatorio/pdf?mes=<%= mes %>" class="btn-primary" target="_blank">
-    <i class="fa-solid fa-file-pdf"></i> Baixar PDF
-</a>
 
-                        <!-- EXCLUIR -->
                         <form method="POST"
                               action="/correias/<%= c.id %>/delete"
-                              onsubmit="return confirm('Excluir correia?');"
-                              style="display:inline;">
-                            <button class="btn-delete btn-stack"
-                                    style="width:85px; height:85px;">
+                              onsubmit="return confirm('Excluir correia?');">
+                            <button class="btn-delete">
                                 <i class="fa-solid fa-trash"></i>
                                 <span class="btn-label">Excluir</span>
                             </button>
                         </form>
 
-                    </td>
-
-                </tr>
+                    </div>
+                </td>
+            </tr>
             <% }) %>
 
         </tbody>
     </table>
+
+</div>
+
+<!-- Botão PDF -->
+<div style="margin-top:20px;">
+    <a href="/correias/relatorio/pdf" class="btn-primary" target="_blank">
+        <i class="fa-solid fa-file-pdf"></i> Baixar PDF Completo
+    </a>
 </div>

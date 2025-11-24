@@ -1,4 +1,4 @@
-<%- include("../partials/cabecalho") %>
+<%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
     <i class="fa-solid fa-gears"></i>
@@ -7,33 +7,29 @@
 
 <div class="card form-card">
 
-    <% if (error) { %>
-        <div class="alert alert-error"><%= error %></div>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert-error"><%= error %></div>
     <% } %>
 
     <form action="/correias/novo" method="POST" class="formulario">
 
         <div class="form-grid">
 
-            <!-- Nome -->
             <div class="grupo">
                 <label>Nome da Correia</label>
                 <input type="text" name="nome" required>
             </div>
 
-            <!-- Modelo -->
             <div class="grupo">
                 <label>Modelo</label>
                 <input type="text" name="modelo">
             </div>
 
-            <!-- Medida -->
             <div class="grupo">
                 <label>Medida</label>
                 <input type="text" name="medida">
             </div>
 
-            <!-- Quantidade -->
             <div class="grupo">
                 <label>Quantidade em Estoque</label>
                 <input type="number" name="quantidade" min="0" value="0">
@@ -41,7 +37,7 @@
 
         </div> <!-- /form-grid -->
 
-        <button class="btn btn-verde-claro btn-full">
+        <button class="btn btn-verde-claro btn-full" style="margin-top:12px;">
             <i class="fa-solid fa-floppy-disk"></i>
             Cadastrar Correia
         </button>
@@ -50,10 +46,10 @@
 
 </div>
 
-<div class="voltar-box">
+<div class="voltar-box" style="margin-top:12px;">
     <a href="/correias" class="btn btn-cinza-escuro">
         ← Voltar
     </a>
 </div>
 
-<%- include("../partial
+<%- include("./partials/rodape") %>

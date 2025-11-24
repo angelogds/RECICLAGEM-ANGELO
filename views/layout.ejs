@@ -7,42 +7,30 @@
 
     <title><%= typeof title !== "undefined" ? title : "Campo do Gado" %></title>
 
-    <!-- CSS principal -->
     <link rel="stylesheet" href="/css/style.css">
-
-    <!-- CSS somente para impressão -->
     <link rel="stylesheet" href="/css/style-print.css" media="print">
 
-    <!-- FontAwesome -->
     <script src="https://kit.fontawesome.com/65d9d7e32a.js" crossorigin="anonymous"></script>
 
-    <!-- Chart.js (opcional, só usa se dashboard precisar) -->
     <% if (typeof chartjs !== "undefined" && chartjs === true) { %>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <% } %>
-
 </head>
 
 <body>
 
-    <!--------------------------
-        BOTÃO FLUTUANTE MENU
-    --------------------------->
     <button id="menuToggle" class="menu-toggle smooth">
         <img 
-            src="<%= session.logo ? '/uploads/' + session.logo : '/uploads/default_logo.png' %>"
+            src="<%= session && session.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
             class="menu-logo-icon"
             onerror="this.src='/img/logo_menu_256.png'">
     </button>
 
-    <!--------------------------
-            SIDEBAR PREMIUM
-    --------------------------->
-    <aside id="sidebar" class="sidebar rounded-sidebar smooth">
+    <aside id="sidebar" class="sidebar smooth">
 
         <div class="logo-area">
             <img 
-                src="<%= session.logo ? '/uploads/' + session.logo : '/uploads/default_logo.png' %>" 
+                src="<%= session && session.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
                 class="logo"
                 onerror="this.src='/img/logo_menu_256.png'">
             <h2>Campo do Gado</h2>
@@ -56,7 +44,7 @@
                 </a>
             </li>
 
-            <% if (session.role === 'admin' || session.role === 'funcionario') { %>
+            <% if (session && (session.role === 'admin' || session.role === 'funcionario')) { %>
 
             <li>
                 <a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>">
@@ -78,7 +66,7 @@
                 </a>
             </li>
 
-            <% if (session.role === 'admin') { %>
+            <% if (session && session.role === 'admin') { %>
             <li>
                 <a href="/users" class="<%= active === 'users' ? 'active' : '' %>">
                     <i class="fa-solid fa-users"></i> Usuários
@@ -86,26 +74,15 @@
             </li>
             <% } %>
 
-            <li>
-                <a href="/logout">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </a>
-            </li>
+            <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
 
         </ul>
-
     </aside>
 
-    <!--------------------------
-        ÁREA PRINCIPAL
-    --------------------------->
     <main id="mainContent" class="main-content smooth">
         <%- body %>
     </main>
 
-    <!--------------------------
-            SCRIPT MENU
-    --------------------------->
     <script>
         const btn = document.getElementById("menuToggle");
         const sidebar = document.getElementById("sidebar");
@@ -118,5 +95,4 @@
     </script>
 
 </body>
-
 </html>

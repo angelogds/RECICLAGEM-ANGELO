@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+
+<style>
+    body {
+        font-family: "Inter", sans-serif;
+        margin: 40px;
+        color: #083b1d;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 26px;
+        margin-bottom: 6px;
+        color: #0b5e33;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 0;
+        opacity: .8;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+        font-size: 13px;
+    }
+
+    th {
+        background: #d8f3dc;
+        padding: 10px;
+        border: 1px solid #cde7d2;
+        text-align: left;
+        font-weight: 700;
+        color: #064e3b;
+    }
+
+    td {
+        padding: 8px;
+        border: 1px solid #e1efe4;
+    }
+
+    tr:nth-child(even) td {
+        background: #f6fbf7;
+    }
+
+    .total {
+        font-weight: 700;
+        background: #d8f3dc;
+    }
+
+    .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 12px;
+        opacity: .7;
+    }
+
+    .logo {
+        width: 90px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+
+</style>
+</head>
+
+<body>
+
+    <img src="<%= logoBase64 %>" class="logo">
+
+    <h1>Relatório de Consumo de Correias</h1>
+    <h2>Mês: <%= mes %></h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Equipamento</th>
+                <th>Correia</th>
+                <th>Total Consumido</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <% if (rel.length === 0) { %>
+            <tr>
+                <td colspan="3" style="text-align:center; padding:14px;">
+                    Nenhum consumo registrado neste mês.
+                </td>
+            </tr>
+            <% } %>
+
+            <% rel.forEach(r => { %>
+            <tr>
+                <td><%= r.equipamento %></td>
+                <td><%= r.correia %></td>
+                <td><%= r.total %></td>
+            </tr>
+            <% }) %>
+
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Sistema Campo do Gado • Relatório automático gerado em <%= new Date().toLocaleString() %>
+    </div>
+
+</body>
+</html>

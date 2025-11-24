@@ -19,10 +19,10 @@
 
 <body>
 
-    <!-- BOTÃO DO MENU -->
+    <!-- BOTÃO MENU -->
     <button id="menuToggle" class="menu-toggle smooth">
         <img 
-            src="<%= session && session.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
+            src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
             class="menu-logo-icon"
             onerror="this.src='/img/logo_menu_256.png'">
     </button>
@@ -32,7 +32,7 @@
 
         <div class="logo-area">
             <img 
-                src="<%= session && session.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
+                src="<%= session?.logo ? '/uploads/' + session.logo : '/img/logo_menu_256.png' %>"
                 class="logo"
                 onerror="this.src='/img/logo_menu_256.png'">
             <h2>Campo do Gado</h2>
@@ -40,40 +40,30 @@
 
         <ul class="menu">
 
-            <li>
-                <a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">
-                    <i class="fa-solid fa-chart-line"></i> Dashboard
-                </a>
-            </li>
+            <li><a href="/" class="<%= active === 'dashboard' ? 'active' : '' %>">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a></li>
 
             <% if (session && (session.role === 'admin' || session.role === 'funcionario')) { %>
 
-            <li>
-                <a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>">
-                    <i class="fa-solid fa-truck"></i> Equipamentos
-                </a>
-            </li>
+            <li><a href="/equipamentos" class="<%= active === 'equipamentos' ? 'active' : '' %>">
+                <i class="fa-solid fa-truck"></i> Equipamentos
+            </a></li>
 
-            <li>
-                <a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>">
-                    <i class="fa-solid fa-gears"></i> Correias / Estoque
-                </a>
-            </li>
+            <li><a href="/correias" class="<%= active === 'correias' ? 'active' : '' %>">
+                <i class="fa-solid fa-gears"></i> Correias / Estoque
+            </a></li>
 
             <% } %>
 
-            <li>
-                <a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>">
-                    <i class="fa-solid fa-list-check"></i> Ordens
-                </a>
-            </li>
+            <li><a href="/ordens" class="<%= active === 'ordens' ? 'active' : '' %>">
+                <i class="fa-solid fa-list-check"></i> Ordens
+            </a></li>
 
             <% if (session && session.role === 'admin') { %>
-            <li>
-                <a href="/users" class="<%= active === 'users' ? 'active' : '' %>">
-                    <i class="fa-solid fa-users"></i> Usuários
-                </a>
-            </li>
+            <li><a href="/users" class="<%= active === 'users' ? 'active' : '' %>">
+                <i class="fa-solid fa-users"></i> Usuários
+            </a></li>
             <% } %>
 
             <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
@@ -81,17 +71,19 @@
         </ul>
     </aside>
 
-    <!-- TOPO ORIGINAL (SEM DUPLICAÇÃO) -->
+    <!-- TOPBAR ÚNICA (CORRETA) -->
     <header class="top-bar smooth">
 
-        <span class="top-title">Campo do Gado</span>
+        <div class="top-bar-left">
+            <span class="top-title">Campo do Gado</span>
+        </div>
 
-        <div style="display:flex; align-items:center; gap:16px;">
+        <div class="top-bar-right">
 
-            <% if (session && session.usuario) { %>
+            <% if (session?.usuario) { %>
 
                 <div class="search-box">
-                    <input type="text" placeholder="Pesquisar...">
+                    <input type="text" placeholder="Pesquisar..." />
                     <button class="search-btn">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
@@ -102,11 +94,15 @@
                     <span><%= session.usuario %></span>
                 </div>
 
-                <a href="/logout" class="btn btn-verde-claro">Sair</a>
+                <a href="/logout" class="btn btn-verde-claro">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </a>
 
             <% } else { %>
 
-                <a href="/login" class="btn btn-verde-claro">Entrar</a>
+                <a href="/login" class="btn btn-verde-claro">
+                    <i class="fa-solid fa-right-to-bracket"></i> Entrar
+                </a>
 
             <% } %>
 
@@ -114,7 +110,7 @@
 
     </header>
 
-    <!-- CONTEÚDO -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <main id="mainContent" class="main-content smooth">
         <%- body %>
     </main>

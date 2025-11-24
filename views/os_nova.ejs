@@ -1,0 +1,54 @@
+<%- include("../partials/cabecalho") %>
+
+<h1 class="page-title">
+    <i class="fa-solid fa-file-circle-plus"></i>
+    Abrir Nova Ordem de Serviço
+</h1>
+
+<div class="card form-card">
+
+    <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/os/nova" method="POST" class="formulario">
+
+        <div class="grupo">
+            <label for="equipamento_id">Equipamento</label>
+            <select name="equipamento_id" id="equipamento_id" required>
+                <option value="">Selecione...</option>
+                <% equipamentos.forEach(eq => { %>
+                    <option value="<%= eq.id %>"><%= eq.nome %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="grupo">
+            <label for="tipo">Tipo</label>
+            <select name="tipo" id="tipo" required>
+                <option value="Mecânica">Mecânica</option>
+                <option value="Elétrica">Elétrica</option>
+                <option value="Preventiva">Preventiva</option>
+                <option value="Corretiva">Corretiva</option>
+            </select>
+        </div>
+
+        <div class="grupo">
+            <label for="descricao">Descrição</label>
+            <textarea name="descricao" id="descricao" rows="4" required></textarea>
+        </div>
+
+        <button class="btn btn-verde-claro btn-full">
+            <i class="fa-solid fa-floppy-disk"></i> Abrir OS
+        </button>
+
+    </form>
+</div>
+
+<div class="voltar-box">
+    <a href="/os" class="btn btn-cinza-escuro">
+        ← Voltar
+    </a>
+</div>
+
+<%- include("../partials/rodape") %>

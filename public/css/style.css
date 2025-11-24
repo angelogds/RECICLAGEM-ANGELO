@@ -214,5 +214,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--green-800)}
 .table-modern th:first-child{width:48px}
 .table-modern td.actions-col{width:160px;text-align:center}
 .thumb.small{width:64px;height:48px}
+/* Miniaturas de imagens na tabela de equipamentos */
+.thumb {
+    width: 90px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #0f5132;
+}
+
+/* Garantir que nenhuma imagem estoure o layout */
+.table-modern img,
+.table img {
+    max-width: 90px !important;
+    max-height: 70px !important;
+    width: 90px !important;
+    height: 70px !important;
+    object-fit: cover;
+}
 
 /* end of file */

@@ -1,59 +1,70 @@
 <%- include("./partials/cabecalho") %>
 
 <h1 class="page-title">
-    <i class="fa-solid fa-plus"></i>
-    Cadastrar Novo Equipamento
+    <% if (equipamento) { %>
+        <i class="fa-solid fa-pen"></i> Editar Equipamento
+    <% } else { %>
+        <i class="fa-solid fa-plus"></i> Cadastrar Novo Equipamento
+    <% } %>
 </h1>
 
 <div class="card form-card">
 
-    <% if (error) { %>
-        <div class="alert-error"><%= error %></div>
-    <% } %>
-
-    <form action="/equipamentos" method="POST" enctype="multipart/form-data" class="formulario">
+    <form 
+        action="<%= equipamento ? '/equipamentos/' + equipamento.id : '/equipamentos' %>" 
+        method="POST" 
+        enctype="multipart/form-data"
+        class="formulario">
 
         <div class="grupo">
             <label>Nome do Equipamento</label>
-            <input type="text" name="nome" required>
+            <input type="text" name="nome" required value="<%= equipamento ? equipamento.nome : '' %>">
         </div>
 
         <div class="grupo">
             <label>Modelo</label>
-            <input type="text" name="modelo">
+            <input type="text" name="modelo" value="<%= equipamento ? equipamento.modelo : '' %>">
         </div>
 
         <div class="grupo">
             <label>Localização</label>
-            <input type="text" name="local">
+            <input type="text" name="local" value="<%= equipamento ? equipamento.local : '' %>">
         </div>
 
         <div class="grupo">
             <label>Código</label>
-            <input type="text" name="codigo">
+            <input type="text" name="codigo" value="<%= equipamento ? equipamento.codigo : '' %>">
         </div>
 
         <div class="grupo">
             <label>Descrição</label>
-            <textarea name="descricao" rows="4"></textarea>
+            <textarea name="descricao" rows="4"><%= equipamento ? equipamento.descricao : '' %></textarea>
         </div>
 
+        <% if (equipamento && equipamento.imagem) { %>
+            <div class="grupo">
+                <label>Foto atual:</label><br>
+                <img src="/<%= equipamento.imagem %>" class="thumb" style="margin-top:8px; max-width:120px;">
+            </div>
+        <% } %>
+
         <div class="grupo">
-            <label>Foto do Equipamento</label>
-            <!-- 🔥 CORRETO PARA MULTER -->
+            <label>Nova Foto (opcional)</label>
             <input type="file" name="imagem" accept="image/*">
         </div>
 
         <button class="btn btn-verde-claro btn-full">
-            <i class="fa-solid fa-floppy-disk"></i> Salvar Equipamento
+            <% if (equipamento) { %>
+                <i class="fa-solid fa-save"></i> Salvar Alterações
+            <% } else { %>
+                <i class="fa-solid fa-floppy-disk"></i> Salvar Equipamento
+            <% } %>
         </button>
 
     </form>
 
 </div>
 
-<a href="/equipamentos" class="btn btn-cinza-escuro">
-    ← Voltar
-</a>
+<a href="/equipamentos" class="btn btn-cinza-escuro">← Voltar</a>
 
 <%- include("./partials/rodape") %>

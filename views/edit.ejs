@@ -11,7 +11,7 @@
         <div class="alert-error"><%= error %></div>
     <% } %>
 
-    <form action="/equipamentos/<%= equipamento.id %>/editar" method="POST" enctype="multipart/form-data" class="formulario">
+    <form action="/equipamentos/<%= equipamento.id %>" method="POST" enctype="multipart/form-data" class="formulario">
 
         <div class="grupo">
             <label>Nome</label>
@@ -25,7 +25,7 @@
 
         <div class="grupo">
             <label>Localização</label>
-            <input type="text" name="localizacao" value="<%= equipamento.localizacao %>">
+            <input type="text" name="local" value="<%= equipamento.local %>">
         </div>
 
         <div class="grupo">
@@ -40,19 +40,20 @@
 
         <div class="grupo">
             <label>Foto atual</label><br>
-            <% if (equipamento.foto) { %>
-                <img src="/uploads/<%= equipamento.foto %>" class="thumb" style="margin-top:6px;">
+            <% if (equipamento.imagem) { %>
+                <img src="/<%= equipamento.imagem %>" class="thumb" style="margin-top:8px;">
             <% } else { %>
-                <span class="small">Sem foto cadastrada</span>
+                <span class="small">Sem foto cadastrada.</span>
             <% } %>
         </div>
 
         <div class="grupo">
-    <label>Nova foto (opcional)</label>
-    <input type="file" name="imagem" accept="image/*">
-</div>
+            <label>Nova foto (opcional)</label>
+            <!-- 🔥 CORRETO PARA MULTER -->
+            <input type="file" name="imagem" accept="image/*">
+        </div>
 
-        <button class="btn btn-verde-claro btn-full" type="submit">
+        <button class="btn btn-verde-claro btn-full">
             <i class="fa-solid fa-save"></i> Salvar Alterações
         </button>
 

@@ -1,53 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-
+<meta charset="utf-8">
 <title>Relatório de Correias</title>
 
 <style>
     body {
         font-family: Arial, sans-serif;
-        font-size: 13px;
+        font-size: 12px;
         margin: 20px;
+        color: #222;
     }
 
     h1 {
         text-align: center;
-        margin-bottom: 8px;
-        font-size: 22px;
         color: #0D6B33;
+        margin-bottom: 6px;
+        font-size: 18px;
     }
 
     .sub {
         text-align: center;
-        font-size: 13px;
-        margin-bottom: 25px;
+        font-size: 11px;
         color: #555;
+        margin-bottom: 16px;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 12px;
+        font-size: 11px;
+        margin-top: 10px;
     }
 
     th {
         background: #0D6B33;
-        color: white;
+        color: #fff;
         padding: 8px;
-        font-size: 12px;
         border: 1px solid #ccc;
+        font-weight: 700;
     }
 
     td {
         padding: 7px;
         border: 1px solid #ddd;
-    }
-
-    .right {
-        text-align: right;
+        vertical-align: top;
     }
 
     .center {
@@ -55,10 +52,10 @@
     }
 
     .footer {
-        margin-top: 35px;
+        margin-top: 18px;
         text-align: center;
-        font-size: 11px;
-        color: #666;
+        font-size: 10px;
+        color: #777;
     }
 
 </style>
@@ -66,61 +63,53 @@
 
 <body>
 
-    <!-- LOGO (se enviada do server.js) -->
-    <% if (logo) { %>
-        <div style="text-align:center; margin-bottom:15px;">
-            <img src="<%= logo %>" style="width:85px;">
-        </div>
-    <% } %>
+<!-- Logo -->
+<% if (logo) { %>
+<div style="text-align:center; margin-bottom:10px;">
+    <img src="<%= logo %>" style="width:80px;">
+</div>
+<% } %>
 
-    <h1>Relatório de Correias</h1>
-    <div class="sub">
-        Estoque completo atualizado em <%= dataGeracao %>
-    </div>
+<h1>Relatório de Correias</h1>
+<div class="sub">
+    Gerado em <%= dataGeracao %> — Total: <%= correias.length %>
+</div>
 
-    <table>
-        <thead>
+<table>
+    <thead>
+        <tr>
+            <th style="width:50px;">ID</th>
+            <th>Nome</th>
+            <th>Modelo</th>
+            <th>Medida</th>
+            <th style="width:80px;">Quantidade</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        <% if (correias.length === 0) { %>
             <tr>
-                <th style="width:45px;">ID</th>
-                <th>Nome</th>
-                <th>Modelo</th>
-                <th>Medida</th>
-                <th style="width:70px;" class="center">Qtd</th>
+                <td colspan="5" class="center">Nenhuma correia cadastrada.</td>
             </tr>
-        </thead>
+        <% } %>
 
-        <tbody>
+        <% correias.forEach(c => { %>
+        <tr>
+            <td class="center"><%= c.id %></td>
+            <td><%= c.nome %></td>
+            <td><%= c.modelo %></td>
+            <td><%= c.medida %></td>
+            <td class="center"><%= c.quantidade %></td>
+        </tr>
+        <% }) %>
 
-            <% correias.forEach(c => { %>
-            <tr>
-                <td class="center"><%= c.id %></td>
-                <td><%= c.nome %></td>
-                <td><%= c.modelo %></td>
-                <td><%= c.medida %></td>
-                <td class="center"><%= c.quantidade %></td>
-            </tr>
-            <% }) %>
+    </tbody>
+</table>
 
-            <% if (correias.length === 0) { %>
-                <tr>
-                    <td colspan="5" class="center" style="padding:12px;">
-                        Nenhuma correia cadastrada.
-                    </td>
-                </tr>
-            <% } %>
-
-        </tbody>
-    </table>
-
-    <div style="margin-top:20px; font-size: 14px;">
-        <strong>Total de itens diferentes:</strong> <%= correias.length %>
-    </div>
-
-    <div class="footer">
-        Campo do Gado — Sistema de Manutenção  
-        <br>
-        Relatório gerado automaticamente.
-    </div>
+<div class="footer">
+    Campo do Gado — Sistema de Manutenção
+</div>
 
 </body>
 </html>

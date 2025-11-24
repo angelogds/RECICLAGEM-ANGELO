@@ -6,7 +6,7 @@
 </h1>
 
 <div class="top-actions">
-    <a href="/os/nova" class="btn btn-verde-claro">
+    <a href="/ordens/novo" class="btn btn-verde-claro">
         <i class="fa-solid fa-plus"></i> Nova OS
     </a>
 </div>
@@ -18,10 +18,11 @@
             <tr>
                 <th>ID</th>
                 <th>Equipamento</th>
+                <th>Solicitante</th>
                 <th>Tipo</th>
-                <th>Descrição</th>
                 <th>Status</th>
-                <th style="width:160px;text-align:center;">Ações</th>
+                <th>Abertura</th>
+                <th style="width:180px; text-align:center;">Ações</th>
             </tr>
         </thead>
 
@@ -29,59 +30,60 @@
 
             <% if (ordens.length === 0) { %>
                 <tr>
-                    <td colspan="6" class="empty">Nenhuma OS cadastrada.</td>
+                    <td colspan="7" class="empty">Nenhuma OS aberta ou fechada.</td>
                 </tr>
             <% } %>
 
-            <% ordens.forEach(o => { %>
-            <tr>
-                <td><%= o.id %></td>
-                <td><%= o.equipamento_nome %></td>
-                <td><%= o.tipo %></td>
-                <td><%= o.descricao.substring(0, 50) %>...</td>
+            <% ordens.forEach(os => { %>
+                <tr>
+                    <td><%= os.id %></td>
+                    <td><%= os.equipamento_nome || "-" %></td>
+                    <td><%= os.solicitante %></td>
+                    <td><%= os.tipo %></td>
 
-                <td>
-                    <% if (o.status === "Fechada") { %>
-                        <span class="tag verde-escuro">Fechada</span>
-                    <% } else if (o.status === "Em Andamento") { %>
-                        <span class="tag cinza-escuro">Em Andamento</span>
-                    <% } else { %>
-                        <span class="tag cinza-claro">Aberta</span>
-                    <% } %>
-                </td>
+                    <td>
+                        <% if (os.status === 'aberta') { %>
+                            <span class="tag green">Aberta</span>
+                        <% } else { %>
+                            <span class="tag cinza">Fechada</span>
+                        <% } %>
+                    </td>
 
-                <td class="actions">
+                    <td><%= os.aberta_em %></td>
 
-                    <a href="/os/<%= o.id %>" class="action-btn btn-qr">
-                        <i class="fa-solid fa-eye"></i>
-                        <span class="btn-label-dark">Ver</span>
-                    </a>
+                    <td class="actions">
 
-                    <a href="/os/<%= o.id %>/editar" class="action-btn btn-edit">
-                        <i class="fa-solid fa-pen"></i>
-                        <span class="btn-label">Editar</span>
-                    </a>
+                        <!-- VER OS -->
+                        <a href="/ordens/<%= os.id %>" 
+                           class="action-btn btn-qr">
+                            <i class="fa-solid fa-eye"></i>
+                            <span class="btn-label">Ver</span>
+                        </a>
 
-                    <a href="/os/<%= o.id %>/finalizar" class="action-btn btn-corr">
-                        <i class="fa-solid fa-check"></i>
-                        <span class="btn-label-dark">Finalizar</span>
-                    </a>
+                        <% if (os.status === 'aberta') { %>
+                        <!-- FECHAR OS -->
+                        <a href="/ordens/<%= os.id %>"
+                           class="action-btn btn-verde-escuro">
+                            <i class="fa-solid fa-lock"></i>
+                            <span class="btn-label">Fechar</span>
+                        </a>
+                        <% } %>
 
-                </td>
-            </tr>
+                        <!-- PDF -->
+                        <a href="/solicitacao/pdf/<%= os.id %>" 
+                           class="action-btn btn-pdf">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span class="btn-label">PDF</span>
+                        </a>
+
+                    </td>
+                </tr>
             <% }) %>
 
         </tbody>
+
     </table>
 
-</div>
-
-<div class="relatorio-actions">
-    <a href="/os/relatorio/pdf" target="_blank" class="btn btn-verde-escuro">
-        <i class="fa-solid fa-file-pdf"></i> PDF Completo
-    </a>
-
-    <a href="/" class="btn btn-cinza-escuro">← Voltar</a>
 </div>
 
 <%- include("./partials/rodape") %>

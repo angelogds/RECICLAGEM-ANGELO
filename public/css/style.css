@@ -185,3 +185,105 @@ footer{text-align:center;margin-top:40px;color:#666;font-size:12px}
   .actions{flex-direction:row;flex-wrap:wrap;gap:8px}
   .tabela th,.tabela td{font-size:13px;padding:8px}
 }
+/* =========================
+   PATCH RÁPIDO: corrige forms e cards
+   Colar no final de public/css/style.css
+   ========================= */
+
+/* Forçar campos do formulário a ocuparem 100% do container */
+.formulario input[type="text"],
+.formulario input[type="number"],
+.formulario input[type="file"],
+.formulario input[type="password"],
+.formulario input[type="email"],
+.formulario select,
+.formulario textarea,
+.card.form-card input,
+.card.form-card select,
+.card.form-card textarea {
+  width: 100% !important;
+  display: block;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #d7efe0;
+  background: #f7fff8;
+  box-sizing: border-box;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+/* Ajuste para file input (mantém botão ao lado, mas dentro do fluxo) */
+.formulario input[type="file"] {
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+}
+
+/* Grelha de formulário — para quando quiser 2 colunas */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+/* Card do formulário: padding consistente e borda suave */
+.card.form-card {
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+
+/* Botões: garantir aparência consistente */
+.btn,
+.btn-primary,
+.btn-verde-claro,
+.btn-verde-escuro {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-verde-claro {
+  background: var(--green-800);
+  color: #fff;
+}
+.btn-verde-claro:hover { background: var(--green-900); }
+
+.btn-cinza-escuro {
+  background: #6c757d;
+  color: #fff;
+}
+.btn-cinza-escuro:hover { background: #5a6367; }
+
+/* Espaçamento do label para ficar alinhado com os inputs */
+.formulario label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #0b4b2a;
+}
+
+/* Corrige inputs inline pequenos — força quebra de linha em elementos antigos */
+.formulario .inline,
+.formulario .small-input {
+  width: 100% !important;
+}
+
+/* Footer do card (rodapé) */
+.voltar-box, .relatorio-actions { margin-top: 16px; }
+
+/* Proteção extra: para evitar CSS antigo sobrescrevendo */
+.card .form-grid > div { min-width: 0; }
+
+/* Responsivo */
+@media (max-width: 700px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .menu-toggle { left: 12px; top: 12px; }
+}

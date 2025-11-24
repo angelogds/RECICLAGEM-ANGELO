@@ -1,72 +1,76 @@
 <h1 class="page-title">
-    <i class="fa-solid fa-gears"></i> Correias — <%= equipamento.nome %>
+    <i class="fa-solid fa-gears"></i> Correias do Equipamento
 </h1>
 
-<!-- CARD: info do equipamento -->
-<div class="card" style="background:white; padding:20px; border-radius:12px; margin-bottom:25px; box-shadow:0 2px 6px #00000015;">
-    <p><strong>ID:</strong> <%= equipamento.id %></p>
-    <p><strong>Código:</strong> <%= equipamento.codigo %></p>
-</div>
+<div class="card">
 
-<!-- REGISTRAR CONSUMO -->
-<h2 class="page-title" style="font-size:22px; margin-top:10px;">
-    <i class="fa-solid fa-arrow-down-wide-short"></i> Registrar Consumo
-</h2>
+    <h2 style="color:#0b5e33; font-weight:800; margin-bottom:18px;">
+        <%= equipamento.nome %>
+    </h2>
 
-<div class="card" style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 6px #00000015; max-width:500px;">
+    <form method="POST" class="form-card">
 
-    <form method="POST" action="/equipamentos/<%= equipamento.id %>/correias">
+        <p style="margin-bottom:20px; opacity:0.8;">
+            Selecione as correias usadas e defina a quantidade aplicada neste equipamento.
+        </p>
 
-        <label style="font-weight:600;">Correia</label>
-        <select name="correia_id" required
-                style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
-            <option value="">Selecione</option>
-            <% listaCorreias.forEach(c => { %>
-                <option value="<%= c.id %>"><%= c.nome %> — <%= c.modelo %></option>
-            <% }) %>
-        </select>
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th>Correia</th>
+                    <th>Modelo</th>
+                    <th>Medida</th>
+                    <th>Qtd</th>
+                    <th>Usar</th>
+                </tr>
+            </thead>
 
-        <label style="font-weight:600;">Quantidade</label>
-        <input type="number" min="1" name="quantidade" required
-               style="width:100%; padding:12px; border-radius:8px; border:1px solid #d9d9d9; margin-bottom:18px;">
+            <tbody>
+                <% correias.forEach(c => { %>
+                    <tr>
+                        <td><%= c.nome %></td>
+                        <td><%= c.modelo %></td>
+                        <td><%= c.medida %></td>
 
-        <button class="btn-primary">
-            <i class="fa-solid fa-plus"></i> Registrar
-        </button>
+                        <td style="max-width:75px;">
+                            <input type="number"
+                                   name="qtd_<%= c.id %>"
+                                   value="<%= mapLigados[c.id] || 0 %>"
+                                   min="0"
+                                   style="width:80px;">
+                        </td>
+
+                        <td class="center">
+                            <input type="checkbox"
+                                   name="correia"
+                                   value="<%= c.id %>"
+                                   <%= mapLigados[c.id] ? "checked" : "" %> >
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+
+        <div style="text-align:center; margin-top:25px;">
+            <button class="btn-primary" style="padding:14px 26px;">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+            </button>
+        </div>
+
     </form>
-</div>
 
-<!-- HISTÓRICO -->
-<h2 class="page-title" style="font-size:22px; margin-top:40px;">
-    <i class="fa-solid fa-boxes-stacked"></i> Histórico de Consumo
-</h2>
+    <div class="actions" style="margin-top:25px;">
 
-<div class="card" style="background:white; padding:20px; border-radius:12px; box-shadow:0 2px 6px #00000015;">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Correia</th>
-                <th>Qtd</th>
-                <th>Data</th>
-            </tr>
-        </thead>
+        <a href="/equipamentos/<%= equipamento.id %>" class="btn-edit btn-stack">
+            <i class="fa-solid fa-eye"></i>
+            <span class="btn-label">Ver</span>
+        </a>
 
-        <tbody>
-            <% if (historico.length === 0) { %>
-                <tr>
-                    <td colspan="3" style="text-align:center; opacity:0.6; padding:15px;">
-                        Nenhum consumo lançado.
-                    </td>
-                </tr>
-            <% } %>
+        <a href="/equipamentos" class="btn-history btn-stack">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="btn-label">Voltar</span>
+        </a>
 
-            <% historico.forEach(h => { %>
-                <tr>
-                    <td><%= h.nome %> — <%= h.modelo %></td>
-                    <td><%= h.quantidade %></td>
-                    <td><%= h.data %></td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
+    </div>
+
 </div>

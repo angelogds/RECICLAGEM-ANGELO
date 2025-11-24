@@ -1,80 +1,71 @@
+<%- include("./partials/cabecalho") %>
+
 <h1 class="page-title">
-    <i class="fa-solid fa-file-lines"></i>
-    Ordem de Serviço #<%= os.id %>
+    <i class="fa-solid fa-eye"></i>
+    Visualizar Ordem de Serviço
 </h1>
 
 <div class="card">
 
-    <h3 style="margin-bottom:14px;">Informações da OS</h3>
+    <h2 style="margin-bottom:10px; color:var(--green-900);">
+        OS #<%= os.id %> — <%= os.status %>
+    </h2>
 
-    <p><strong>Equipamento:</strong> <%= equipamento.nome %></p>
-    <p><strong>Tipo de OS:</strong> <%= os.tipo %></p>
+    <p><strong>Equipamento:</strong> <%= os.equipamento_nome %></p>
+    <p><strong>Tipo:</strong> <%= os.tipo %></p>
+    <p><strong>Descrição:</strong> <%= os.descricao %></p>
+    <p><strong>Técnico:</strong> <%= os.tecnico || "-" %></p>
 
-    <p>
+    <div style="margin-top:10px;">
         <strong>Status:</strong>
-        <% if (os.status === 'fechada') { %>
-            <span class="tag green">Finalizada</span>
+        <% if (os.status === "Fechada") { %>
+            <span class="tag verde-escuro">Fechada</span>
+        <% } else if (os.status === "Em Andamento") { %>
+            <span class="tag cinza-escuro">Em Andamento</span>
         <% } else { %>
-            <span class="tag warn">Aberta</span>
+            <span class="tag cinza-claro">Aberta</span>
         <% } %>
-    </p>
+    </div>
 
-    <p><strong>Aberta em:</strong> <%= os.aberta_em %></p>
+    <hr style="margin: 18px 0;">
 
-    <% if (os.fechada_em) { %>
-    <p><strong>Fechada em:</strong> <%= os.fechada_em %></p>
-    <% } %>
-
-    <hr style="margin:20px 0; opacity:0.3;">
-
-    <h3 style="margin-bottom:12px;">Descrição do Problema</h3>
-    <p style="white-space:pre-wrap; line-height:1.6;">
-        <%= os.descricao %>
-    </p>
+    <p><strong>Abertura:</strong> <%= os.data_abertura %></p>
+    <p><strong>Fechamento:</strong> <%= os.data_fechamento || '-' %></p>
 
 </div>
 
-<!-- BOTÕES DE AÇÃO -->
-<div class="card" style="text-align:center; margin-top:20px;">
+<div class="card">
+
+    <h2 style="margin-bottom:10px;">Ações</h2>
 
     <div class="actions">
 
-        <!-- EDITAR -->
-        <a href="/os/<%= os.id %>/editar" class="btn-action btn-edit">
+        <a href="/os/<%= os.id %>/editar" class="action-btn btn-edit">
             <i class="fa-solid fa-pen"></i>
             <span class="btn-label">Editar</span>
         </a>
 
-        <!-- FINALIZAR -->
-        <% if (os.status !== 'fechada') { %>
-        <a href="/os/<%= os.id %>/finalizar" class="btn-action btn-history">
-            <i class="fa-solid fa-lock"></i>
-            <span class="btn-label">Finalizar</span>
+        <a href="/os/<%= os.id %>/finalizar" class="action-btn btn-corr">
+            <i class="fa-solid fa-check"></i>
+            <span class="btn-label-dark">Finalizar</span>
         </a>
-        <% } %>
 
-        <!-- PDF -->
-        <a href="/os/<%= os.id %>/pdf" class="btn-action btn-qr">
+        <a href="/os/<%= os.id %>/fechar" class="action-btn btn-hist">
+            <i class="fa-solid fa-lock"></i>
+            <span class="btn-label">Fechar</span>
+        </a>
+
+        <a href="/os/<%= os.id %>/pdf" class="btn-pdf" target="_blank">
             <i class="fa-solid fa-file-pdf"></i>
             <span class="btn-label">PDF</span>
         </a>
-
-        <!-- DELETAR -->
-        <form action="/os/<%= os.id %>/delete" method="POST"
-              onsubmit="return confirm('Excluir esta OS?');"
-              style="display:inline;">
-            <button class="btn-action btn-delete">
-                <i class="fa-solid fa-trash"></i>
-                <span class="btn-label">Excluir</span>
-            </button>
-        </form>
 
     </div>
 
 </div>
 
-<div style="margin-top:18px;">
-    <a href="/ordens" class="btn-secondary">
-        ← Voltar
-    </a>
-</div>
+<a href="/ordens" class="btn btn-cinza-escuro">
+    ← Voltar
+</a>
+
+<%- include("./partials/rodape") %>

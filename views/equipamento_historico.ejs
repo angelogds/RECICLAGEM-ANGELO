@@ -2,58 +2,81 @@
 
 <h1 class="page-title">
     <i class="fa-solid fa-clock-rotate-left"></i>
-    Histórico do Equipamento
+    Histórico — <%= equipamento.nome %>
 </h1>
 
-<div class="card">
-    <h2 style="color:var(--green-900); margin-bottom:10px;">
-        <%= equipamento.nome %>
-    </h2>
-
-    <p><strong>Modelo:</strong> <%= equipamento.modelo || '-' %></p>
-    <p><strong>Localização:</strong> <%= equipamento.localizacao || '-' %></p>
-    <p><strong>Código:</strong> <%= equipamento.codigo || '-' %></p>
-</div>
-
 <div class="card tabela-card">
+
+    <h2 style="color:var(--green-900); margin-bottom:10px;">
+        Ordens de Serviço
+    </h2>
 
     <table class="tabela">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Serviço</th>
-                <th>Técnico</th>
-                <th>Data</th>
-                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Aberta em</th>
+                <th>Fechada em</th>
             </tr>
         </thead>
 
         <tbody>
-
-            <% if (historico.length === 0) { %>
-            <tr>
-                <td colspan="5" class="empty">Nenhum histórico registrado.</td>
-            </tr>
+            <% if (ordens.length === 0) { %>
+                <tr>
+                    <td colspan="5" class="empty">Nenhum histórico registrado.</td>
+                </tr>
+            <% } else { %>
+                <% ordens.forEach(o => { %>
+                    <tr>
+                        <td><%= o.id %></td>
+                        <td><%= o.tipo %></td>
+                        <td><%= o.status %></td>
+                        <td><%= o.aberta_em %></td>
+                        <td><%= o.fechada_em || "—" %></td>
+                    </tr>
+                <% }) %>
             <% } %>
-
-            <% historico.forEach(h => { %>
-            <tr>
-                <td><%= h.id %></td>
-                <td><%= h.tipo_servico %></td>
-                <td><%= h.tecnico || '-' %></td>
-                <td><%= h.data_servico %></td>
-                <td><%= h.descricao %></td>
-            </tr>
-            <% }) %>
-
         </tbody>
     </table>
 
 </div>
 
-<a href="/equipamentos/<%= equipamento.id %>" class="btn btn-cinza-escuro">
-    ← Voltar
-</a>
+<div class="card tabela-card">
+
+    <h2 style="color:var(--green-900); margin-bottom:10px;">
+        Consumo de Correias
+    </h2>
+
+    <table class="tabela">
+        <thead>
+            <tr>
+                <th>Correia</th>
+                <th>Quantidade</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% if (correias.length === 0) { %>
+                <tr>
+                    <td colspan="3" class="empty">Nenhum consumo registrado.</td>
+                </tr>
+            <% } else { %>
+                <% correias.forEach(c => { %>
+                    <tr>
+                        <td><%= c.correia %></td>
+                        <td><%= c.quantidade %></td>
+                        <td><%= c.data %></td>
+                    </tr>
+                <% }) %>
+            <% } %>
+        </tbody>
+    </table>
+
+</div>
+
+<a href="/equipamentos/<%= equipamento.id %>/menu" class="btn btn-cinza-escuro">← Voltar</a>
 
 <%- include("./partials/rodape") %>
-

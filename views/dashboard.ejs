@@ -1,79 +1,65 @@
-<%- include("./partials/cabecalho") %>
+<% layout('layout') -%>
 
-<h1 class="page-title">
-  <i class="fa-solid fa-chart-pie"></i>
-  Dashboard
-</h1>
+<h1 class="page-title"><i class="fa-solid fa-chart-pie"></i> Dashboard</h1>
 
-<!-- === GRID DOS CARDS (LAYOUT ANTIGO RESTAURADO) === -->
+<!-- GRID de 4 cards (lado a lado em desktop) -->
 <div class="grid-cards">
-
   <div class="metric-card card">
     <h3>Total de Equipamentos</h3>
-    <p class="metric-value">
-      <%= totais && totais.equipamentos ? totais.equipamentos : 0 %>
-    </p>
+    <p class="metric-value"><%= totais?.equipamentos ?? 0 %></p>
   </div>
 
   <div class="metric-card card">
     <h3>Ordens Abertas</h3>
-    <p class="metric-value">
-      <%= totais && totais.abertas ? totais.abertas : 0 %>
-    </p>
+    <p class="metric-value"><%= totais?.abertas ?? 0 %></p>
   </div>
 
   <div class="metric-card card">
     <h3>Ordens Fechadas</h3>
-    <p class="metric-value">
-      <%= totais && totais.fechadas ? totais.fechadas : 0 %>
-    </p>
+    <p class="metric-value"><%= totais?.fechadas ?? 0 %></p>
   </div>
 
   <div class="metric-card card">
     <h3>Total de Correias em Estoque</h3>
-    <p class="metric-value">
-      <%= typeof correiasTop !== 'undefined' ? Object.values(correiasTop).reduce((a,b)=>a+b,0) : 0 %>
-    </p>
+    <p class="metric-value"><%= totais?.correias ?? 0 %></p>
   </div>
-
 </div>
 
-<!-- === GRÁFICO 1 === -->
+<!-- Gráficos -->
 <div class="card chart-card">
   <h2>Ordens por Tipo</h2>
   <canvas id="chartOrdensTipo" width="600" height="260"></canvas>
 </div>
 
-<!-- === GRÁFICO 2 === -->
 <div class="card chart-card">
   <h2>Top 10 Correias — Estoque</h2>
   <canvas id="chartCorreias" width="600" height="260"></canvas>
 </div>
 
-<!-- === BOTÕES === -->
 <div class="relatorio-actions">
   <a href="/relatorios/gerar-pdf-dashboard" class="btn btn-verde-escuro">
     <i class="fa-solid fa-file-pdf"></i> Exportar PDF do Dashboard
   </a>
-
-  <a href="/relatorios" class="btn btn-cinza-escuro">
-    <i class="fa-solid fa-folder"></i> Ver relatórios
-  </a>
+  <a href="/relatorios" class="btn btn-cinza-escuro">Ver relatórios</a>
 </div>
 
-<%- include("./partials/rodape") %>
+<%- include("partials/rodape") %>
 
 <script>
-  window.REL_ORDENS = <%- JSON.stringify(tipos || {}) %>;
+  // dados passados pelo server
+  window.REL_ORDENS = <%- JSON.stringify(ordensPorTipo || {}) %>;
   window.REL_CORREIAS = <%- JSON.stringify(correiasTop || {}) %>;
 
   (function(){
-    if (typeof Chart === 'undefined') return;
+    if (typeof Chart === 'undefined') {
+      console.warn('Chart.js não encontrado.');
+      return;
+    }
 
     try {
-      const ordensData = window.REL_ORDENS;
-      const labels1 = ordensData.map(o => o.tipo);
-      const values1 = ordensData.map(o => o.total);
+      const ordensData = window.REL_ORDENS || {};
+      const labels1 = Object.keys(ordensData);
+      const values1 = Object.values(ordensData);
 
       const ctx1 = document.getElementById('chartOrdensTipo').getContext('2d');
       new Chart(ctx1, {
@@ -91,7 +77,7 @@
         }
       });
 
-      const correiasData = window.REL_CORREIAS;
+      const correiasData = window.REL_CORREIAS || {};
       const labels2 = Object.keys(correiasData);
       const values2 = Object.values(correiasData);
 
@@ -109,12 +95,14 @@
         options: {
           indexAxis: 'y',
           responsive: true,
-          plugins: { legend: { display: false } }
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true }
+          }
         }
       });
-
     } catch (e) {
-      console.warn('Erro no dashboard:', e);
+      console.warn('Erro ao inicializar gráficos do dashboard', e);
     }
   })();
 </script>

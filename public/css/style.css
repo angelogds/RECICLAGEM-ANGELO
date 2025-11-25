@@ -546,3 +546,33 @@ td img, .tabela td img {
   .grid-cards { grid-template-columns: 1fr; }
 }
 
+/* ================================
+   GRÁFICOS LADO A LADO
+=================================== */
+
+.charts-wrapper {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.chart-small {
+    flex: 1;
+    height: 380px;
+}
+
+.chart-small canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+    .charts-wrapper {
+        flex-direction: column;
+    }
+
+    .chart-small {
+        height: 360px;
+    }
+}

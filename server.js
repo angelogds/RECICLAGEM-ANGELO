@@ -987,7 +987,7 @@ app.get('/solicitacao/pdf/:id', authRequired, async (req, res) => {
 
     // -------------------------
     // CABEÇALHO E DADOS DA OS
-    --------------------------
+    // --------------------------
     doc.fontSize(22).text('Ordem de Serviço (OS)', { align: 'center' });
     doc.moveDown(2);
 

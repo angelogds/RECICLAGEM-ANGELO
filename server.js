@@ -1096,52 +1096,112 @@ app.get('/', authRequired, async (req, res) => {
   }
 });
 // -------------------------------------------------------
-// GERAR PDF DO DASHBOARD (com gráficos convertidos em imagem)
+// PDF COMPLETO DO DASHBOARD COM GRÁFICOS (Chart.js convertidos em imagem)
 // -------------------------------------------------------
 app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
   try {
     const PdfKit = require("pdfkit");
     const doc = new PdfKit({ margin: 40 });
 
-    res.setHeader("Content-Disposition", "attachment; filename=dashboard.pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=dashboard_completo.pdf");
     res.setHeader("Content-Type", "application/pdf");
 
     doc.pipe(res);
 
-    doc.fontSize(22).text("Relatório do Dashboard", { align: "center" });
-    doc.moveDown();
+    // Título
+    doc.fontSize(22).text("Relatório Completo — Dashboard", { align: "center" });
+    doc.moveDown(2);
 
-    // Dados principais
-    const totais = {
-      equipamentos: 0,
-      abertas: 0,
-      fechadas: 0,
-      correias: 0
-    };
-
+    // ================================
+    // 1. CARREGAR DADOS DO BANCO
+    // ================================
     const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
     const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
     const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
     const totalCorreias = await getAsync(`SELECT COUNT(*) AS c FROM correias`);
 
-    totais.equipamentos = totalEquip?.c || 0;
-    totais.abertas = totalAbertas?.c || 0;
-    totais.fechadas = totalFechadas?.c || 0;
-    totais.correias = totalCorreias?.c || 0;
+    const tiposRows = await allAsync(`
+      SELECT tipo, COUNT(*) AS total
+      FROM ordens
+      GROUP BY tipo
+    `);
 
-    // Escrever no PDF
-    doc.fontSize(14).text(`Total de Equipamentos: ${totais.equipamentos}`);
-    doc.text(`Ordens Abertas: ${totais.abertas}`);
-    doc.text(`Ordens Fechadas: ${totais.fechadas}`);
-    doc.text(`Correias no Estoque: ${totais.correias}`);
+    const correiasTopRows = await allAsync(`
+      SELECT nome, quantidade
+      FROM correias
+      ORDER BY quantidade DESC
+      LIMIT 10
+    `);
 
+    // ================================
+    // 2. EXIBIR TOTAIS NO PDF
+    // ================================
+    doc.fontSize(16).text("Resumo Geral", { underline: true });
+    doc.moveDown();
+
+    doc.fontSize(13).text(`Total de Equipamentos: ${totalEquip?.c || 0}`);
+    doc.text(`Ordens Abertas: ${totalAbertas?.c || 0}`);
+    doc.text(`Ordens Fechadas: ${totalFechadas?.c || 0}`);
+    doc.text(`Correias no Estoque: ${totalCorreias?.c || 0}`);
+
+    doc.moveDown(2);
+
+    // ================================
+    // 3. CONVERTER GRÁFICOS EM IMAGENS
+    // ================================
+    // Vamos renderizar os gráficos no lado do servidor usando chartjs-node-canvas
+
+    const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+    const width = 800;
+    const height = 500;
+
+    const chartCanvas = new ChartJSNodeCanvas({ width, height });
+
+    // GRÁFICO 1 — ORDENS POR TIPO
+    const chart1 = await chartCanvas.renderToBuffer({
+      type: 'pie',
+      data: {
+        labels: tiposRows.map(x => x.tipo),
+        datasets: [{
+          data: tiposRows.map(x => x.total),
+        }]
+      }
+    });
+
+    // GRÁFICO 2 — TOP 10 CORREIAS
+    const chart2 = await chartCanvas.renderToBuffer({
+      type: 'bar',
+      data: {
+        labels: correiasTopRows.map(x => x.nome),
+        datasets: [{
+          label: "Estoque",
+          data: correiasTopRows.map(x => x.quantidade)
+        }]
+      },
+      options: { indexAxis: "y" }
+    });
+
+    // ================================
+    // 4. INSERIR OS GRÁFICOS NO PDF
+    // ================================
+    doc.addPage();
+    doc.fontSize(18).text("Gráfico — Ordens por Tipo", { align: "center" });
+    doc.moveDown(1);
+    doc.image(chart1, { fit: [500, 400], align: "center" });
+
+    doc.addPage();
+    doc.fontSize(18).text("Gráfico — Top 10 Correias", { align: "center" });
+    doc.moveDown(1);
+    doc.image(chart2, { fit: [500, 400], align: "center" });
+
+    // Finalizar PDF
     doc.end();
+
   } catch (err) {
-    console.error("Erro ao gerar PDF do dashboard:", err);
-    res.status(500).send("Erro ao gerar PDF do dashboard.");
+    console.error("Erro ao gerar PDF completo do dashboard:", err);
+    res.status(500).send("Erro ao gerar PDF.");
   }
 });
-
 
 
 // =====================================================

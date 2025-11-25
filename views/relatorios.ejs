@@ -1,0 +1,44 @@
+<%- include('./partials/cabecalho') %>
+
+<h1 class="page-title">
+  <i class="fa-solid fa-file-lines"></i> Relatórios
+</h1>
+
+<div class="grid-cards">
+  <div class="metric-card card">
+    <h3>Total de Equipamentos</h3>
+    <p class="metric-value"><%= totais.equipamentos %></p>
+  </div>
+
+  <div class="metric-card card">
+    <h3>Total de Ordens</h3>
+    <p class="metric-value"><%= totais.ordens %></p>
+  </div>
+
+  <div class="metric-card card">
+    <h3>Ordens Abertas</h3>
+    <p class="metric-value"><%= totais.abertas %></p>
+  </div>
+
+  <div class="metric-card card">
+    <h3>Ordens Fechadas</h3>
+    <p class="metric-value"><%= totais.fechadas %></p>
+  </div>
+
+  <div class="metric-card card">
+    <h3>Total Correias</h3>
+    <p class="metric-value"><%= totais.correias %></p>
+  </div>
+</div>
+
+<div class="relatorio-actions">
+  <a href="/relatorios/gerar-pdf-dashboard" class="btn btn-verde-escuro">
+    <i class="fa-solid fa-file-pdf"></i> PDF do Dashboard
+  </a>
+
+  <a href="/relatorios/gerar-pdf-completo" class="btn btn-cinza-escuro">
+    <i class="fa-solid fa-file-pdf"></i> PDF Completo Geral
+  </a>
+</div>
+
+<%- include('./partials/rodape') %>

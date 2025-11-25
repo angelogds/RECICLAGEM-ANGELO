@@ -592,3 +592,66 @@ td img, .tabela td img {
     margin: 0 auto;
     display: block;
 }
+/* =============================
+   CORREÇÃO TABELA EQUIPAMENTOS
+   ============================= */
+
+/* Reduz a altura geral da tabela */
+.tabela td {
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+}
+
+/* FOTO compacta */
+.tabela .thumb,
+td img {
+    width: 70px !important;
+    height: 55px !important;
+    object-fit: cover !important;
+    border-radius: 6px;
+    border: 2px solid #0f5132;
+}
+
+/* Linha mais compacta */
+.tabela tr {
+    height: 68px !important;
+}
+
+/* Botões de ação em linha (horizontal) */
+.actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Todos os botões ficam menores */
+.action-btn {
+    width: 45px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+}
+
+.action-btn span {
+    font-size: 11px !important;
+}
+
+/* Ajuste de coluna de ações */
+td.acoes-col {
+    width: 260px !important;
+    text-align: center !important;
+}
+
+/* Nome, modelo, localização compactos */
+.tabela td:nth-child(3),
+.tabela td:nth-child(4),
+.tabela td:nth-child(5) {
+    font-size: 14px !important;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

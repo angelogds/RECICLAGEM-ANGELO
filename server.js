@@ -1039,9 +1039,6 @@ app.get('/solicitacao/pdf/:id', authRequired, async (req, res) => {
 // Peça "Parte 4" para finalizar (Dashboard + Start do servidor).
 // server.js — PARTE 4/4
 // Dashboard avançado + Start
-
-// =====================================================
-// ================== DASHBOARD ========================
 // =====================================================
 // ================== DASHBOARD (VERSÃO COMPLETA) =====================
 app.get('/', authRequired, async (req, res) => {
@@ -1096,6 +1093,52 @@ app.get('/', authRequired, async (req, res) => {
   } catch (err) {
     console.error("Erro ao carregar dashboard:", err);
     res.send("Erro ao carregar dashboard.");
+  }
+});
+// -------------------------------------------------------
+// GERAR PDF DO DASHBOARD (com gráficos convertidos em imagem)
+// -------------------------------------------------------
+app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
+  try {
+    const PdfKit = require("pdfkit");
+    const doc = new PdfKit({ margin: 40 });
+
+    res.setHeader("Content-Disposition", "attachment; filename=dashboard.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+
+    doc.pipe(res);
+
+    doc.fontSize(22).text("Relatório do Dashboard", { align: "center" });
+    doc.moveDown();
+
+    // Dados principais
+    const totais = {
+      equipamentos: 0,
+      abertas: 0,
+      fechadas: 0,
+      correias: 0
+    };
+
+    const totalEquip = await getAsync(`SELECT COUNT(*) AS c FROM equipamentos`);
+    const totalAbertas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='aberta'`);
+    const totalFechadas = await getAsync(`SELECT COUNT(*) AS c FROM ordens WHERE status='fechada'`);
+    const totalCorreias = await getAsync(`SELECT COUNT(*) AS c FROM correias`);
+
+    totais.equipamentos = totalEquip?.c || 0;
+    totais.abertas = totalAbertas?.c || 0;
+    totais.fechadas = totalFechadas?.c || 0;
+    totais.correias = totalCorreias?.c || 0;
+
+    // Escrever no PDF
+    doc.fontSize(14).text(`Total de Equipamentos: ${totais.equipamentos}`);
+    doc.text(`Ordens Abertas: ${totais.abertas}`);
+    doc.text(`Ordens Fechadas: ${totais.fechadas}`);
+    doc.text(`Correias no Estoque: ${totais.correias}`);
+
+    doc.end();
+  } catch (err) {
+    console.error("Erro ao gerar PDF do dashboard:", err);
+    res.status(500).send("Erro ao gerar PDF do dashboard.");
   }
 });
 

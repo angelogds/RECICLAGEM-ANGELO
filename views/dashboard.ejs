@@ -25,13 +25,11 @@
 
 <!-- GRÁFICOS LADO A LADO -->
 <div class="chart-row">
-    <!-- ORDENS POR TIPO -->
     <div class="chart-card card">
         <h2>Ordens por Tipo</h2>
         <canvas id="chartOrdensTipo"></canvas>
     </div>
 
-    <!-- TOP 10 CORREIAS -->
     <div class="chart-card card">
         <h2>Top 10 Correias — Estoque</h2>
         <canvas id="chartCorreias"></canvas>
@@ -47,14 +45,11 @@
     <a href="/relatorios" class="btn btn-cinza-escuro">Ver relatórios</a>
 </div>
 
-<!-- SCRIPTS -->
 <script>
     const REL_ORDENS = <%- JSON.stringify(tipos || []) %>;
     const REL_CORREIAS = <%- JSON.stringify(correiasTop || []) %>;
 
-    /* ---------------------
-       GRÁFICO ORDENS POR TIPO
-    ------------------------ */
+    /* ORDENS POR TIPO */
     const ordensLabels = REL_ORDENS.map(x => x.tipo);
     const ordensValues = REL_ORDENS.map(x => x.total);
 
@@ -75,9 +70,7 @@
         }
     });
 
-    /* ---------------------
-       GRÁFICO TOP 10 CORREIAS
-    ------------------------ */
+    /* CORREIAS TOP 10 */
     const corrLabels = REL_CORREIAS.map(x => x.nome);
     const corrValues = REL_CORREIAS.map(x => x.total);
 

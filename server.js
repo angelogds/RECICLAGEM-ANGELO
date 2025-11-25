@@ -1317,6 +1317,90 @@ app.get('/relatorios', authRequired, async (req, res) => {
     res.send("Erro ao carregar relatórios.");
   }
 });
+// -------------------------------------------------------
+// PDF COMPLETO — LISTAGEM DE TODAS AS OS
+// -------------------------------------------------------
+app.get('/relatorios/gerar-pdf-completo', authRequired, async (req, res) => {
+  try {
+    const ordens = await allAsync(`
+      SELECT 
+        o.id,
+        o.tipo,
+        o.descricao,
+        o.status,
+        o.aberta_em AS data_abertura,
+        o.fechada_em AS data_fechamento,
+        o.solicitante AS tecnico,
+        e.nome AS equipamento_nome
+      FROM ordens o
+      LEFT JOIN equipamentos e ON e.id = o.equipamento_id
+      ORDER BY o.id DESC
+    `);
+
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 40 });
+
+    res.setHeader('Content-Disposition', 'attachment; filename=Relatorio_OS_Completo.pdf');
+    res.setHeader('Content-Type', 'application/pdf');
+
+    doc.pipe(res);
+
+    // --------------------------------
+    // CABEÇALHO
+    // --------------------------------
+    doc.fontSize(22).text('Relatório Completo de Ordens de Serviço', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(11).text(`Gerado em: ${new Date().toLocaleString()}`, { align: 'center' });
+    doc.moveDown(2);
+
+    // --------------------------------
+    // TABLE HEADER
+    // --------------------------------
+    doc.fontSize(12);
+    doc.text('ID', 40);
+    doc.text('Equipamento', 80);
+    doc.text('Tipo', 220);
+    doc.text('Status', 300);
+    doc.text('Abertura', 360);
+    doc.text('Fechamento', 440);
+    doc.text('Técnico', 535);
+    doc.moveDown(0.5);
+
+    doc.moveTo(40, doc.y).lineTo(560, doc.y).stroke();
+    doc.moveDown(0.7);
+
+    // --------------------------------
+    // TABLE BODY
+    // --------------------------------
+    ordens.forEach(o => {
+      if (doc.y > 750) doc.addPage();
+
+      doc.fontSize(11);
+
+      doc.text(o.id.toString(), 40);
+      doc.text(o.equipamento_nome || '-', 80, undefined, { width: 130 });
+      doc.text(o.tipo || '-', 220);
+      doc.text(o.status || '-', 300);
+      doc.text(o.data_abertura || '-', 360);
+      doc.text(o.data_fechamento || '-', 440);
+      doc.text(o.tecnico || '-', 535);
+
+      doc.moveDown(1.2);
+    });
+
+    // --------------------------------
+    // FOOTER
+    // --------------------------------
+    doc.moveDown(3);
+    doc.fontSize(10).text('Campo do Gado — Sistema de Manutenção', { align: 'center' });
+
+    doc.end();
+
+  } catch (err) {
+    console.error("Erro ao gerar PDF completo das OS:", err);
+    res.status(500).send("Erro ao gerar PDF.");
+  }
+});
 
 
 // =====================================================

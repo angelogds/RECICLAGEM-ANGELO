@@ -1034,6 +1034,46 @@ app.get('/solicitacao/pdf/:id', authRequired, async (req, res) => {
     res.send('Erro ao gerar PDF.');
   }
 });
+// =======================
+// RELATÓRIO DE EQUIPAMENTOS (PDF)
+// =======================
+app.get('/equipamentos/relatorio/pdf', authRequired, async (req, res) => {
+  try {
+    const equipamentos = await allAsync(`
+      SELECT id, nome, codigo, local, descricao, created_at
+      FROM equipamentos
+      ORDER BY nome ASC
+    `);
+
+    const doc = new PDFDocument({ margin: 40 });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=equipamentos_relatorio.pdf');
+
+    doc.pipe(res);
+
+    doc.fontSize(22).text('Relatório de Equipamentos', { align: 'center' });
+    doc.moveDown(2);
+
+    if (equipamentos.length === 0) {
+      doc.fontSize(14).text("Nenhum equipamento encontrado.", { align: "center" });
+    } else {
+      equipamentos.forEach(eq => {
+        doc.fontSize(14).text(`• ${eq.nome}`);
+        doc.fontSize(11).text(`Código: ${eq.codigo || '-'}`);
+        doc.text(`Local: ${eq.local || '-'}`);
+        doc.text(`Descrição: ${eq.descricao || '-'}`);
+        doc.text(`Criado em: ${eq.created_at}`);
+        doc.moveDown(1);
+      });
+    }
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao gerar PDF.');
+  }
+});
 
 // -------------------------- FIM PARTE 3/4 --------------------------
 // Peça "Parte 4" para finalizar (Dashboard + Start do servidor).

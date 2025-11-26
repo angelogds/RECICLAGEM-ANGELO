@@ -1182,7 +1182,7 @@ app.get('/', authRequired, async (req, res) => {
   }
 });
 // ----------------------------------------------------------
-// RELATÓRIO COMPLETO DO DASHBOARD (PADRÃO PROFISSIONAL)
+// RELATÓRIO COMPLETO DO DASHBOARD — VERSÃO PROFISSIONAL
 // ----------------------------------------------------------
 app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
     try {
@@ -1190,12 +1190,12 @@ app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
         const PDFDocument = require("pdfkit");
         const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
 
-        const larguraGrafico = 800;
-        const alturaGrafico = 450;
-        const chartCanvas = new ChartJSNodeCanvas({ width: larguraGrafico, height: alturaGrafico });
+        const chartWidth = 900;
+        const chartHeight = 450;
+        const chartJS = new ChartJSNodeCanvas({ width: chartWidth, height: chartHeight });
 
         // ------------------------------
-        // BUSCAR DADOS FILTRADOS (30 DIAS)
+        // BUSCAR DADOS (ULTIMOS 30 DIAS)
         // ------------------------------
         const totais = {
             equipamentos: (await getAsync(`SELECT COUNT(*) AS t FROM equipamentos`)).t,
@@ -1219,113 +1219,128 @@ app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
         `);
 
         // ------------------------------
-        // CRIAR GRÁFICOS
+        // GERAR GRÁFICOS COLORIDOS
         // ------------------------------
-        const grafico1 = await chartCanvas.renderToBuffer({
+        const colorsPalette = [
+            "#0D6B33", "#DBA800", "#A40000",
+            "#0077CC", "#4444CC", "#00A67A",
+            "#F57C00", "#C2185B", "#7B1FA2", "#388E3C"
+        ];
+
+        const grafico1 = await chartJS.renderToBuffer({
             type: "pie",
             data: {
                 labels: tipos.map(t => t.tipo),
                 datasets: [{
-                    data: tipos.map(t => t.total)
+                    data: tipos.map(t => t.total),
+                    backgroundColor: colorsPalette
                 }]
             },
-            options: { plugins: { legend: { position: "bottom" } } }
+            options: {
+                plugins: {
+                    legend: { position: "bottom", labels: { font: { size: 14 } } }
+                }
+            }
         });
 
-        const grafico2 = await chartCanvas.renderToBuffer({
+        const grafico2 = await chartJS.renderToBuffer({
             type: "bar",
             data: {
                 labels: correiasTop.map(c => c.nome),
                 datasets: [{
                     label: "Estoque",
-                    data: correiasTop.map(c => c.quantidade)
+                    data: correiasTop.map(c => c.quantidade),
+                    backgroundColor: colorsPalette
                 }]
             },
             options: {
                 indexAxis: "y",
-                plugins: { legend: { position: "bottom" } },
-                scales: { x: { beginAtZero: true } }
+                plugins: {
+                    legend: { position: "bottom", labels: { font: { size: 14 } } }
+                },
+                scales: {
+                    x: { ticks: { font: { size: 12 } } },
+                    y: { ticks: { font: { size: 11 } } }
+                }
             }
         });
 
         // ------------------------------
         // INICIAR PDF
         // ------------------------------
-        const doc = new PDFDocument({ margin: 40 });
-        res.setHeader("Content-Disposition", "attachment; filename=dashboard_completo.pdf");
+        const doc = new PDFDocument({ margin: 40, size: "A4" });
+        res.setHeader("Content-Disposition", "attachment; filename=dashboard.pdf");
         res.setHeader("Content-Type", "application/pdf");
         doc.pipe(res);
 
-        // LOGO
+        // LOGO + TÍTULO
         try {
             doc.image(path.join(__dirname, "public/img/logo_campo_do_gado.png"), 40, 40, { width: 90 });
         } catch {}
 
-        // TÍTULO
         doc.fontSize(22).fillColor("#0D6B33")
            .text("Relatório Completo — Dashboard", 150, 50);
+
         doc.fontSize(11).fillColor("#444")
            .text(`Gerado em: ${new Date().toLocaleString()}`, 150, 80);
-        doc.moveDown(2);
+
+        doc.moveDown(3);
 
         // ------------------------------
-        // RESUMO GERAL EM TABELA
+        // RESUMO GERAL MELHORADO
         // ------------------------------
         doc.fontSize(16).fillColor("#0D6B33")
            .text("Resumo Geral", { underline: true });
-        doc.moveDown(1);
 
         const resumo = [
-            ["Total Equipamentos", totais.equipamentos],
+            ["Total de Equipamentos", totais.equipamentos],
             ["Ordens Abertas", totais.abertas],
             ["Ordens Fechadas", totais.fechadas],
             ["Correias no Estoque", totais.correias]
         ];
 
         resumo.forEach((linha, i) => {
+            const y = doc.y;
+
             if (i % 2 === 0) {
-                doc.rect(40, doc.y, 515, 20).fill("#F3F3F3");
-                doc.fillColor("#000");
+                doc.rect(40, y, 520, 24).fill("#F2F2F2");
             }
 
-            doc.fontSize(12)
-               .text(linha[0], 45, doc.y + 5)
-               .text(linha[1].toString(), 450, doc.y + 5);
+            doc.fillColor("#0D6B33").fontSize(12)
+               .text(linha[0], 50, y + 6);
 
-            doc.moveDown(1.3);
+            doc.fillColor("#000").fontSize(12)
+               .text(linha[1].toString(), 480, y + 6);
+
+            doc.moveDown(1.4);
         });
 
-        doc.addPage();
+        doc.moveDown(1.5);
 
         // ------------------------------
-        // GRÁFICO 1 — OS POR TIPO
+        // GRÁFICO 1 + GRÁFICO 2 NA MESMA PÁGINA
         // ------------------------------
         doc.fontSize(16).fillColor("#0D6B33")
            .text("Gráfico — Ordens por Tipo", { align: "center" });
-        doc.moveDown(1);
 
-        doc.image(grafico1, { fit: [500, 400], align: "center" });
+        doc.image(grafico1, 55, doc.y + 10, { width: 230 });
 
-        doc.addPage();
-
-        // ------------------------------
-        // GRÁFICO 2 — TOP 10 CORREIAS
-        // ------------------------------
         doc.fontSize(16).fillColor("#0D6B33")
-           .text("Gráfico — Top 10 Correias", { align: "center" });
-        doc.moveDown(1);
+           .text("Gráfico — Top 10 Correias", 330, doc.y - 5, { align: "left" });
 
-        doc.image(grafico2, { fit: [500, 400], align: "center" });
+        doc.image(grafico2, 330, doc.y + 15, { width: 230 });
 
+        // ------------------------------
         // RODAPÉ
+        // ------------------------------
         doc.fontSize(10).fillColor("#777")
            .text("Campo do Gado — Sistema de Manutenção", 40, 800, { align: "center" });
 
         doc.end();
 
     } catch (err) {
-        console.error("ERRO GERAR PDF DASHBOARD:", err);
-        res.status(500).send("Erro ao gerar PDF do dashboard");
+        console.error("Erro Dashboard PDF:", err);
+        res.status(500).send("Erro ao gerar PDF do Dashboard");
     }
 });
 

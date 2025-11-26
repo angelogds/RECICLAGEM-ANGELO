@@ -1182,7 +1182,7 @@ app.get('/', authRequired, async (req, res) => {
   }
 });
 // ----------------------------------------------------------
-// RELATÓRIO COMPLETO DO DASHBOARD — VERSÃO FINAL
+// RELATÓRIO COMPLETO DO DASHBOARD — VERSÃO FINAL (LOGO FIXA)
 // ----------------------------------------------------------
 app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
   try {
@@ -1277,8 +1277,11 @@ app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
 
     // ---------------------- CABEÇALHO ----------------------
     try {
-      doc.image(path.join(__dirname, "public/uploads/logo_campo_do_gado.png"), 40, 40, { width: 70 });
-    } catch {}
+      // LOGO FIXA (FUNCIONA NO RAILWAY)
+      doc.image(path.join(__dirname, "public/img/logo_campo_do_gado.png"), 40, 40, { width: 70 });
+    } catch(e) {
+      console.log("Logo não encontrada:", e);
+    }
 
     doc.fontSize(22).fillColor(GREEN).text("Relatório Completo — Dashboard", 130, 50);
     doc.fontSize(10).fillColor("#444").text(`Gerado em: ${new Date().toLocaleString()}`, 130, 80);

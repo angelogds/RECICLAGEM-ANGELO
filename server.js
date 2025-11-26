@@ -1391,70 +1391,146 @@ app.get('/relatorios/gerar-pdf-completo', authRequired, async (req, res) => {
             return y + 25;
         }
 
-        // ==============================
-        // Gerar PDF Equipamento por Equipamento
-        // ==============================
+      // -------------------------------------------------------
+// PDF COMPLETO — EQUIPAMENTOS UM EMBAIXO DO OUTRO
+// -------------------------------------------------------
+app.get('/relatorios/gerar-pdf-completo', authRequired, async (req, res) => {
+    try {
+
+        const ordens = await allAsync(`
+        SELECT 
+            o.id,
+            e.nome AS equipamento,
+            o.tipo,
+            o.status,
+            o.aberta_em,
+            o.fechada_em,
+            o.solicitante
+        FROM ordens o
+        LEFT JOIN equipamentos e ON e.id = o.equipamento_id
+        ORDER BY e.nome ASC,
+                 CASE WHEN o.status='aberta' THEN 0 ELSE 1 END,
+                 o.id DESC
+        `);
+
+        const grupos = {};
+        ordens.forEach(o => {
+            if (!grupos[o.equipamento]) grupos[o.equipamento] = [];
+            grupos[o.equipamento].push(o);
+        });
+
+        const PDFDocument = require("pdfkit");
+        const doc = new PDFDocument({ margin: 40 });
+
+        res.setHeader('Content-Disposition', 'attachment; filename=Relatorio_OS.pdf');
+        res.setHeader('Content-Type', 'application/pdf');
+
+        doc.pipe(res);
+
+        // -----------------------------------------
+        // CABEÇALHO
+        // -----------------------------------------
+        try {
+            doc.image(path.join(__dirname, 'public/img/logo_campo_do_gado.png'), 40, 40, { width: 90 });
+        } catch {}
+
+        doc.fontSize(22).fillColor('#0D6B33')
+           .text("Relatório Completo de Ordens de Serviço", 150, 50);
+
+        doc.fontSize(11).fillColor('#444')
+           .text(`Gerado em: ${new Date().toLocaleString()}`, 150, 80);
+
+        doc.moveDown(3);
+
+        // -----------------------------------------
+        // CABEÇALHO DA TABELA
+        // -----------------------------------------
+        function tableHeader(y) {
+            doc.fillColor('#0D6B33')
+               .rect(40, y, 515, 22)
+               .fill();
+
+            doc.fillColor('#fff').fontSize(11)
+               .text("ID", 45, y + 4)
+               .text("Tipo", 90, y + 4)
+               .text("Status", 150, y + 4)
+               .text("Abertura", 230, y + 4)
+               .text("Fechamento", 330, y + 4)
+               .text("Técnico", 450, y + 4);
+
+            return y + 26;
+        }
+
+        // -----------------------------------------
+        // LISTAGEM — UM EQUIPAMENTO DEPOIS DO OUTRO
+        // -----------------------------------------
         let y = doc.y;
 
         for (const equip in grupos) {
 
-            // Nome do equipamento
-            doc.fillColor('#0D6B33')
-               .fontSize(16)
-               .text(`Equipamento: ${equip}`, 40, y, { underline: true });
+            // Quebra de página automática APENAS se faltar espaço
+            if (y > 700) {
+                doc.addPage();
+                y = 40;
+            }
+
+            // Título do Equipamento
+            doc.fontSize(16).fillColor('#0D6B33');
+            doc.text(`Equipamento: ${equip}`, 40, y, { underline: true });
 
             y += 28;
+
+            // Cabeçalho da tabela
             y = tableHeader(y);
 
             let zebra = false;
 
             for (const o of grupos[equip]) {
 
-                // Quebra de página
-                if (y > 750) {
+                // Quebra automática dentro de um equipamento
+                if (y > 740) {
                     doc.addPage();
                     y = 40;
                     y = tableHeader(y);
                 }
 
-                // Fundo zebra
+                // Zebra
                 if (zebra) {
-                    doc.rect(40, y, 515, 18).fill('#F4F4F4');
-                    doc.fillColor('#000');
+                    doc.fillColor('#F3F3F3')
+                       .rect(40, y, 515, 20)
+                       .fill();
                 }
                 zebra = !zebra;
 
-                // Linha
-                doc.fontSize(10).fillColor('#000');
-                doc.text(o.id.toString(), 45, y + 3);
-                doc.text(o.tipo || "-", 90, y + 3);
-                doc.text(o.status || "-", 170, y + 3);
-                doc.text(o.aberta_em || "-", 245, y + 3);
-                doc.text(o.fechada_em || "-", 330, y + 3);
+                doc.fillColor('#000').fontSize(10);
 
-                // Evitar quebra torta do técnico
-                doc.text(o.solicitante || "-", 440, y + 3, { width: 100, ellipsis: true });
+                doc.text(o.id.toString(), 45, y + 5);
+                doc.text(o.tipo || "-", 90, y + 5);
+                doc.text(o.status || "-", 150, y + 5);
+                doc.text(o.aberta_em || "-", 230, y + 5);
+                doc.text(o.fechada_em || "-", 330, y + 5);
+                doc.text(o.solicitante || "-", 450, y + 5, { width: 100, ellipsis: true });
 
-                y += 20;
+                y += 22;
             }
 
-            doc.addPage();
-            y = 40;
+            // Espaço entre equipamentos (sem nova página!)
+            y += 40;
         }
 
+        // -----------------------------------------
         // RODAPÉ
-        doc.fontSize(10)
-           .fillColor('#777')
+        // -----------------------------------------
+        doc.fontSize(10).fillColor('#777')
            .text("Campo do Gado — Sistema de Manutenção", 40, 800, { align: 'center' });
 
         doc.end();
 
     } catch (err) {
-        console.log("Erro PDF:", err);
+        console.log("ERRO PDF:", err);
         res.status(500).send("Erro ao gerar PDF");
     }
 });
-
 
 
 // =====================================================

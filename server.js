@@ -1274,51 +1274,72 @@ app.get('/relatorios/gerar-pdf-dashboard', authRequired, async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "inline; filename=dashboard_completo.pdf");
     doc.pipe(res);
+// Função para formatar a data em português
+function formatarDataBrasil(dataObj) {
+    const meses = [
+        "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+        "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+    ];
+    const dia = String(dataObj.getDate()).padStart(2, "0");
+    const mes = meses[dataObj.getMonth()];
+    const ano = dataObj.getFullYear();
+    return `${dia} de ${mes} de ${ano}`;
+}
+
 // ---------------------- CAPA DO RELATÓRIO ----------------------
 doc.addPage({ margin: 0 });
 
-// Fundo branco (opcional — PDF já é branco)
+// Fundo
 doc.rect(0, 0, doc.page.width, doc.page.height).fill("#FFFFFF");
 
-// Logo grande no centro
+// Logo central
 try {
     doc.image(
       path.join(__dirname, "public/img/logo_campo_do_gado.png"),
       doc.page.width / 2 - 90,
-      100,
+      60,
       { width: 180 }
     );
 } catch (e) {
     console.log("Erro ao carregar logo na capa:", e);
 }
 
-// Título principal
-doc.fillColor("#0A5C2F")
-   .fontSize(32)
-   .text("Relatório Completo", 0, 320, { align: "center" });
+// Títulos da capa
+doc.fillColor("#0A5C2F").fontSize(22)
+   .text("FÁBRICA DE RECICLAGEM – CAMPO DO GADO", 0, 260, { align: "center" });
 
-// Subtítulo
-doc.fontSize(24)
-   .text("Dashboard Operacional", { align: "center" });
+doc.fontSize(18)
+   .text("SETOR DE MANUTENÇÃO INDUSTRIAL", { align: "center" });
+
+doc.moveDown(1);
+
+doc.fontSize(24).fillColor("#0A5C2F")
+   .text("RELATÓRIO TÉCNICO DE ATIVIDADES", { align: "center" });
 
 // Linha decorativa
-doc.moveTo(150, 380)
-   .lineTo(doc.page.width - 150, 380)
+doc.moveTo(150, 350)
+   .lineTo(doc.page.width - 150, 350)
    .lineWidth(3)
    .stroke("#0A5C2F");
 
-// Data
-doc.fillColor("#444")
-   .fontSize(14)
-   .text(`Gerado em: ${new Date().toLocaleString()}`, 0, 410, { align: "center" });
+// 🔥 DATA ATUAL DO SISTEMA
+const hoje = new Date();
+const dataFormatada = formatarDataBrasil(hoje);
 
-// Rodapé da capa
-doc.fontSize(12)
-   .fillColor("#777")
+// Informações técnicas
+doc.fillColor("#444").fontSize(14);
+
+doc.text(`Data: ${dataFormatada}`, 0, 380, { align: "center" });
+doc.text("Responsável Técnico: Ângelo G. da Silva", { align: "center" });
+doc.text("Cargo: Técnico Mecânico / Encarregado de Manutenção", { align: "center" });
+
+// Rodapé
+doc.fontSize(11).fillColor("#777")
    .text("Campo do Gado — Sistema de Manutenção", 0, doc.page.height - 60, { align: "center" });
 
-// Depois da capa, começamos uma nova página para o relatório real
+// Começa o relatório de verdade
 doc.addPage({ margin: 40 });
+
 
     // ---------------------- CABEÇALHO ----------------------
     try {
